@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "840171186843",
+    "project_id": "testshop-9b736",
+    "storage_bucket": "testshop-9b736.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840171186843:android:362e5e2ae8b546bd39343e",
+        "android_client_info": {
+          "package_name": "com.shoppy.shop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "840171186843-vulsk2ms8dae4eoer5r4dinsss2av6ls.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shoppy.shop",
+            "certificate_hash": "3a84215ed717227f027b4ebff1ca9542fcd998ea"
+          }
+        },
+        {
+          "client_id": "840171186843-tnd50ob3rqgg3mo1hidmdi4m2kb2oqdc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUSiFzEI2lm5n_9sGj8Cd9NsfX_KEFHYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "840171186843-tnd50ob3rqgg3mo1hidmdi4m2kb2oqdc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

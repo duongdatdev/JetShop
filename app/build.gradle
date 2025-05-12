@@ -1,0 +1,128 @@
+plugins {
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.hilt.gradle.plugin)
+}
+
+android {
+    namespace 'com.shoppy.shop'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.shoppy.shop"
+        minSdk 29
+        targetSdk 35
+        versionCode 1
+        versionName "1.1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+
+        // Add build config field for API key
+        buildConfigField "String", "API_AI_TOKEN", "\"${System.getenv("AZURE_AI_KEY") ?: ""}\""
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+    packagingOptions {
+        resources {
+            excludes += [
+                    "META-INF/io.netty.versions.properties",
+                    "META-INF/AL2.0",
+                    "META-INF/LGPL2.1",
+                    "META-INF/INDEX.LIST"
+            ]
+        }
+    }
+}
+
+dependencies {
+
+    //Firebase Bom
+    implementation platform(libs.firebase.bom)
+    //Firebase auth and Firestore
+    implementation libs.firebase.auth.ktx
+    implementation libs.firebase.firestore.ktx
+    //Firebase Storage
+    implementation libs.firebase.storage.ktx
+    //Firebase Google SignIn
+    implementation libs.play.services.auth
+
+    // Navigation
+    implementation libs.navigation.compose
+
+    //Firebase Cloud Notification
+    implementation libs.firebase.messaging.ktx
+
+    //Retrofit for push notification
+    implementation libs.retrofit
+    implementation libs.converter.gson
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Coil
+    implementation libs.coil.compose
+
+    //Paging
+    implementation libs.accompanist.pager
+
+    //Dagger - Hilt
+    implementation libs.hilt.android
+    ksp libs.hilt.android.compiler
+    ksp libs.hilt.compiler
+    implementation libs.hilt.navigation.compose
+
+    //System UI
+    implementation libs.accompanist.systemuicontroller
+
+    //ConstraintLayout
+    implementation libs.constraintlayout.compose
+
+    implementation libs.core.ktx
+    implementation libs.lifecycle.runtime.ktx
+    implementation libs.activity.compose
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.ui
+    implementation libs.androidx.ui.graphics
+    implementation libs.androidx.ui.tooling.preview
+    implementation libs.androidx.material3
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.ui.test.junit4
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation platform(libs.androidx.compose.bom)
+    debugImplementation libs.androidx.ui.tooling
+    debugImplementation libs.ui.test.manifest
+
+    // OkHttp for network requests
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    
+    // JSON handling
+    implementation 'org.json:json:20210307'
+
+    // Azure AI
+    implementation libs.azure.ai.openai
+    implementation libs.azure.core
+    implementation libs.azure.identity
+}
