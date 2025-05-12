@@ -115,7 +115,7 @@ fun OrderSummaryItem(mCart: MCart,price: (Int) -> Unit
                     modifier = Modifier.width(180.dp))
 
                     Text(
-                        text = "₹${DecimalFormat("#,##,###").format(mCart.product_price.toString().toDouble())}",
+                        text = "₫${DecimalFormat("#,###").format(mCart.product_price.toString().toDouble())}",
                         style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = roboto), modifier = Modifier.padding(top = 8.dp)
                     )
             }

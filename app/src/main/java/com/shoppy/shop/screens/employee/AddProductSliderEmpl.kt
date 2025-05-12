@@ -1,4 +1,4 @@
-package com.shoppy.shop.screens.admin
+package com.shoppy.shop.screens.employee
 
 import android.net.Uri
 import android.widget.Toast
@@ -99,34 +99,34 @@ fun AddProductSliderEmpl(
         ) {
             Spacer(modifier = Modifier.padding(top = 16.dp))
 
-            Text(
-                text = "Upload Slider",
-                style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = roboto)
-            )
-
-            GalleryLaunchComp(title = "Select Slider", color = Color.Black.copy(0.1f)) {
-                launchGallerySlider.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            }
-
-            if (selectedSliderImageUri.value != null) {
-                SelectedImageItem(uris = selectedSliderImageUri.value)
-            }
-
-            PillButton(
-                title = "Post Slider",
-                color = ShopKartUtils.black.toInt(),
-                modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
-            ) {
-                if (selectedSliderImageUri.value != null) {
-                    viewModel.uploadSliderToStorageGetUrl(selectedSliderImageUri.value) {
-                        selectedSliderImageUri.value = null
-                        navHostController.popBackStack()
-                        Toast.makeText(context, "Slider Uploaded", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(context, "Select an Image", Toast.LENGTH_SHORT).show()
-                }
-            }
+//            Text(
+//                text = "Upload Slider",
+//                style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = roboto)
+//            )
+//
+//            GalleryLaunchComp(title = "Select Slider", color = Color.Black.copy(0.1f)) {
+//                launchGallerySlider.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+//            }
+//
+//            if (selectedSliderImageUri.value != null) {
+//                SelectedImageItem(uris = selectedSliderImageUri.value)
+//            }
+//
+//            PillButton(
+//                title = "Post Slider",
+//                color = ShopKartUtils.black.toInt(),
+//                modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
+//            ) {
+//                if (selectedSliderImageUri.value != null) {
+//                    viewModel.uploadSliderToStorageGetUrl(selectedSliderImageUri.value) {
+//                        selectedSliderImageUri.value = null
+//                        navHostController.popBackStack()
+//                        Toast.makeText(context, "Slider Uploaded", Toast.LENGTH_SHORT).show()
+//                    }
+//                } else {
+//                    Toast.makeText(context, "Select an Image", Toast.LENGTH_SHORT).show()
+//                }
+//            }
 
             Divider()
 
@@ -202,8 +202,8 @@ fun AddProductSliderEmpl(
                             desc = productDescription.value,
                             stock = stock.value,
                             category = selectedCategory.value?.category_name ?: "",
-                            shopId = viewModel.shopId,
-                            shopName = viewModel.shopName
+                            shopId = viewModel.shopId.value,
+                            shopName = viewModel.shopName.value
                         ) {
                             Toast.makeText(context, "Product added successfully", Toast.LENGTH_SHORT).show()
                             navHostController.popBackStack()

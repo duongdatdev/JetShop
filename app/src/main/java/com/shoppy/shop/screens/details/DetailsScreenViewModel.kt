@@ -7,6 +7,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.shoppy.shop.models.MCart
 import kotlinx.coroutines.launch
 
+data class ShopInfo(
+    val id: String? = null,
+    val name: String? = null,
+    val logo: String? = null
+)
+
 class DetailsScreenViewModel :ViewModel(){
 
     private val db = FirebaseFirestore.getInstance()
@@ -33,6 +39,48 @@ class DetailsScreenViewModel :ViewModel(){
 
             db.collection("Cart").document(userId + title).set(cart)
         }
+    }
+
+    fun getShopInfoForProduct(productId: String, callback: (ShopInfo) -> Unit) {
+        // Use Firestore to get the product document
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("AllProducts").document(productId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    // Get shop ID from the product document
+                    val shopId = document.getString("shop_id") ?: ""
+
+                    if (shopId.isNotEmpty()) {
+                        // Fetch shop information using shop ID
+                        db.collection("Shops").document(shopId)
+                            .get()
+                            .addOnSuccessListener { shopDoc ->
+                                if (shopDoc != null && shopDoc.exists()) {
+                                    val shopInfo = ShopInfo(
+                                        id = shopId,
+                                        name = shopDoc.getString("name") ?: "",
+                                        logo = shopDoc.getString("logo")
+                                    )
+                                    callback(shopInfo)
+                                } else {
+                                    callback(ShopInfo()) // Empty shop info
+                                }
+                            }
+                            .addOnFailureListener {
+                                callback(ShopInfo()) // Empty shop info
+                            }
+                    } else {
+                        callback(ShopInfo()) // Empty shop info
+                    }
+                } else {
+                    callback(ShopInfo()) // Empty shop info
+                }
+            }
+            .addOnFailureListener {
+                callback(ShopInfo()) // Empty shop info
+            }
     }
 
     //Delete Product from AllProducts and category using their Category Name and Product ID

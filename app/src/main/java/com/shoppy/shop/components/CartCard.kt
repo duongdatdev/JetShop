@@ -169,7 +169,7 @@ fun CartCardItem(mCart: MCart,viewModel: CartScreenViewModel,
                         verticalAlignment = Alignment.CenterVertically) {
 
                         Text(
-                            text = "₹${DecimalFormat("#,##,###").format(mCart.product_price!!.toDouble())}",
+                            text = "₫${DecimalFormat("#,###").format(mCart.product_price!!.toDouble())}",
                             style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         )
                         

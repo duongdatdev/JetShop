@@ -25,6 +25,9 @@ android {
 
         // Add build config field for API key
         buildConfigField "String", "API_AI_TOKEN", "\"${System.getenv("AZURE_AI_KEY") ?: ""}\""
+        buildConfigField "String", "CLOUDINARY_CLOUD_NAME", "\"${getLocalProperty('cloudinary.cloud_name', '')}\""
+        buildConfigField "String", "CLOUDINARY_API_KEY", "\"${getLocalProperty('cloudinary.api_key', '')}\""
+        buildConfigField "String", "CLOUDINARY_API_SECRET", "\"${getLocalProperty('cloudinary.api_secret', '')}\""
     }
 
     buildTypes {
@@ -121,8 +124,22 @@ dependencies {
     // JSON handling
     implementation 'org.json:json:20210307'
 
+    // Add in dependencies section
+    implementation 'com.cloudinary:cloudinary-android:2.2.0'
+
     // Azure AI
     implementation libs.azure.ai.openai
     implementation libs.azure.core
     implementation libs.azure.identity
+}
+
+// Function to get local properties
+def getLocalProperty(String key, String defaultValue) {
+    Properties properties = new Properties()
+    try {
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        return properties.getProperty(key, defaultValue)
+    } catch (Exception e) {
+        return defaultValue
+    }
 }

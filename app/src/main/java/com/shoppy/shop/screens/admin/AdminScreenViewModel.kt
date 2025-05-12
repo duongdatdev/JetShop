@@ -19,6 +19,7 @@ import com.shoppy.shop.models.MProducts
 import com.shoppy.shop.models.MSliders
 import com.shoppy.shop.models.MUser
 import com.shoppy.shop.repository.FireAttendanceRepository
+import com.shoppy.shop.utils.CloudinaryUtils
 import com.shoppy.shop.utils.ImgBBUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -48,7 +49,7 @@ class AdminScreenViewModel @Inject constructor(
     fun uploadSliderToStorageGetUrl(selectedImageUris: Uri?, taskDone: () -> Unit = {}) {
         viewModelScope.launch {
             if (selectedImageUris != null) {
-                val imageUrl = ImgBBUtils.uploadImage(context, selectedImageUris)
+                val imageUrl = CloudinaryUtils.uploadImage(context, selectedImageUris)
                 if (imageUrl != null) {
                     val sliders = MSliders(slider_image = imageUrl).convertToMap()
                     db.collection("Sliders").add(sliders)
@@ -65,7 +66,7 @@ class AdminScreenViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             if (selectedImageUri != null) {
-                val imageUrl = ImgBBUtils.uploadImage(context, selectedImageUri)
+                val imageUrl = CloudinaryUtils.uploadImage(context, selectedImageUri)
                 if (imageUrl != null) {
                     val brands = MBrand(
                         logo = imageUrl,
@@ -97,7 +98,7 @@ class AdminScreenViewModel @Inject constructor(
         viewModelScope.launch {
             if (selectedImageUri != null) {
                 val productId = UUID.randomUUID().toString()
-                val imageUrl = ImgBBUtils.uploadImage(context, selectedImageUri)
+                val imageUrl = CloudinaryUtils.uploadImage(context, selectedImageUri)
                 
                 if (imageUrl != null) {
                     val products = MProducts(

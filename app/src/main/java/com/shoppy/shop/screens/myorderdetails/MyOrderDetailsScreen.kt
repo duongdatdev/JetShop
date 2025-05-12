@@ -223,7 +223,7 @@ fun MyOrderDetailsScreen(navController: NavController,
 
 
                         Text(
-                            text = "₹${DecimalFormat("#,##,###").format(((product_price - 280) / quantity).toDouble())}",
+                            text = "₫${DecimalFormat("#,###").format(((product_price - 280) / quantity).toDouble())}",
                             style = TextStyle(
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
@@ -388,7 +388,7 @@ fun MyOrderDetailsScreen(navController: NavController,
                     )
                     Text(
                         //280 is price with delivery charge and GST 100 + 180
-                        text = "Item Price: ₹${DecimalFormat("#,##,###").format(((product_price - 280) / quantity).toDouble())}",
+                        text = "Item Price: ₫${DecimalFormat("#,###").format(((product_price - 280) / quantity).toDouble())}",
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -396,7 +396,7 @@ fun MyOrderDetailsScreen(navController: NavController,
                         )
                     )
                     Text(
-                        text = "Delivery Fee: ₹100",
+                        text = "Delivery Fee: ₫100",
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -421,7 +421,7 @@ fun MyOrderDetailsScreen(navController: NavController,
                         )
                     )
                     Text(
-                        text = "Total Price: ₹${DecimalFormat("#,##,###").format(product_price.toDouble())} (Incl. all taxes)",
+                        text = "Total Price: ₫${DecimalFormat("#,###").format(product_price.toDouble())} (Incl. all taxes)",
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,

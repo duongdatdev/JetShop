@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.shoppy.shop.utils.CloudinaryUtils
 import com.shoppy.shop.utils.ImgBBUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -34,7 +35,7 @@ class MyProfileViewModel @Inject constructor(
     fun updateProfileImage(imageUrl: Uri?,name: String,email: String = "",phone: String,address: String){
         viewModelScope.launch {
             if (imageUrl != null) {
-                val uploadedImageUrl = ImgBBUtils.uploadImage(context, imageUrl)
+                val uploadedImageUrl = CloudinaryUtils.uploadImage(context, imageUrl)
                 if (uploadedImageUrl != null) {
                     db.update("profile_image", uploadedImageUrl)
                 }

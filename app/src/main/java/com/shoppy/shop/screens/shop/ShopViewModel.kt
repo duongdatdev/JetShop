@@ -25,7 +25,7 @@ class ShopViewModel @Inject constructor(
             try {
                 _productsByShop.value = Resource.Loading()
 
-                val productsSnapshot = firestore.collection("products")
+                val productsSnapshot = firestore.collection("AllProducts")
                     .whereEqualTo("shop_id", shopId)
                     .get()
                     .await()

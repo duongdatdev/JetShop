@@ -395,8 +395,8 @@ fun PaymentBottomBar(
     ) {
 
         Text(
-            text = "Total Amount: ₹${
-                DecimalFormat("#,##,###").format(
+            text = "Total Amount: ₫${
+                DecimalFormat("#,###").format(
                     totalAmount.toString().toDouble()
                 )
             }",

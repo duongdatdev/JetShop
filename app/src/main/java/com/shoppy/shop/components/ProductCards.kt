@@ -134,7 +134,7 @@ fun CardItem(
             )
 
             Text(
-                text = "₹${DecimalFormat("#,##,###").format(mProducts.product_price!!.toDouble())}",
+                text = "₫${DecimalFormat("#,###").format(mProducts.product_price!!.toDouble())}",
                 style = TextStyle(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,

@@ -106,4 +106,10 @@ object AppModule {
             .build()
             .create(NotificationApi::class.java)
     }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
+    }
 }

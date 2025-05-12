@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.shoppy.shop.navigation.BottomNavScreens.AddProductSliderEmpl
 import com.shoppy.shop.screens.AboutScreen
 import com.shoppy.shop.screens.admin.AddEmployee
 import com.shoppy.shop.screens.admin.AddProductSliderAdmin
@@ -30,7 +31,6 @@ import com.shoppy.shop.screens.checkout.ordersummary.OrderSummaryScreen
 import com.shoppy.shop.screens.checkout.payment.PaymentScreen
 import com.shoppy.shop.screens.details.DetailsScreen
 import com.shoppy.shop.screens.details.DetailsScreenViewModel
-import com.shoppy.shop.screens.employee.AddProductSliderEmpl
 import com.shoppy.shop.screens.employee.AddRemoveBrandEmpl
 import com.shoppy.shop.screens.employee.EmployeeScreen
 import com.shoppy.shop.screens.employee.orderstatus.DeliveredItemsEmp
@@ -45,6 +45,9 @@ import com.shoppy.shop.screens.profile.ProfileScreen
 import com.shoppy.shop.screens.search.SearchScreen
 import com.shoppy.shop.screens.admin.ManageCategoriesScreen
 import com.shoppy.shop.screens.admin.rolemanagement.RoleManagementScreen
+import com.shoppy.shop.screens.employee.AddProductSliderEmpl
+import com.shoppy.shop.screens.employee.ShopSettings
+import com.shoppy.shop.screens.shop.ShopScreen
 
 
 //BottomNavScreens.Home.route
@@ -306,5 +309,21 @@ fun BottomNavigation(
         composable(BottomNavScreens.RoleManagement.route) {
             RoleManagementScreen(navController = navController)
         }
+        composable(BottomNavScreens.ShopSettings.route) {
+            ShopSettings(navController = navController)
+        }
+
+        val shopRoute = BottomNavScreens.Shop.route
+        composable("$shopRoute/{shopId}/{shopName}",
+            arguments = listOf(
+                navArgument("shopId") { type = NavType.StringType },
+                navArgument("shopName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
+            val shopName = backStackEntry.arguments?.getString("shopName") ?: ""
+            ShopScreen(navController = navController, shopId = shopId, shopName = shopName)
+        }
+
     }
 }

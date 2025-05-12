@@ -38,6 +38,8 @@ sealed class BottomNavScreens(
     object OrderSuccessScreen: BottomNavScreens(route = "orderSuccessScreen", title = "OrderSuccessScreen")
     object ManageCategories: BottomNavScreens(route = "manageCategories", title = "ManageCategories")
     object RoleManagement: BottomNavScreens(route = "role_management", title = "Role Management")
+    object ShopSettings: BottomNavScreens(route = "shopSettings", title = "Shop Settings")
+    object Shop: BottomNavScreens(route = "shop", title = "Shop")
 //    object ForgotPasswordScreen: BottomNavScreens(route = "forgotPasswordScreen", title = "ForgotPasswordScreen")
 
     object Items{

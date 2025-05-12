@@ -138,7 +138,7 @@ fun CartBottomBar(totalAmount: String,navHostController: NavHostController){
             )
 
                 Text(
-                    text = "₹${DecimalFormat("#,##,###").format(totalAmount.toDouble())}",
+                    text = "₫${DecimalFormat("#,###").format(totalAmount.toDouble())}",
                     style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto),
                     modifier = Modifier.padding(end = 15.dp)
                 )

@@ -300,7 +300,7 @@ fun SearchResultCardItem(searchList:MProducts,navController: NavHostController){
 
                 Text(text = searchList.product_title!!, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, fontFamily = roboto), maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text(text = searchList.product_description!!, style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal, fontFamily = roboto, color = Color.Black.copy(alpha = 0.5f)), maxLines = 3, overflow = TextOverflow.Ellipsis)
-                Text(text = "₹${DecimalFormat("#,##,###").format(searchList.product_price!!.toDouble())}", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = roboto))
+                Text(text = "₫${DecimalFormat("#,###").format(searchList.product_price!!.toDouble())}", style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = roboto))
             }
 
         }

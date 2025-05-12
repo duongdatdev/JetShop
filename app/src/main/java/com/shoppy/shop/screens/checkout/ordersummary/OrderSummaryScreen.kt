@@ -148,12 +148,12 @@ fun OrderSummaryScreen(navController: NavHostController,viewModel: OrderSummaryS
                     .padding(start = 35.dp, end = 15.dp)) {
 
                     RowComp(title = "Items Count:", price = "${cartList.size}", space = 100.dp)
-                    RowComp(title = "Items Price:", price = "₹${ DecimalFormat("#,##,###").format(totalAmount.value.toDouble()) }", space = 100.dp)
-                    RowComp(title = "Delivery Fee:", price = "₹${ DecimalFormat("#,##,###").format((100 * cartList.size).toDouble()) }", space = 90.dp)
+                    RowComp(title = "Items Price:", price = "₫${ DecimalFormat("#,###").format(totalAmount.value.toDouble()) }", space = 100.dp)
+                    RowComp(title = "Delivery Fee:", price = "₫${ DecimalFormat("#,###").format((100 * cartList.size).toDouble()) }", space = 90.dp)
                     RowComp(title = "GST:", price = "18%", space = 160.dp)
 
                     //(totalAmount.value + 100 * cartList.size) Adding 100rs for each item in the list
-                    RowComp(title = "Total Price:", price = "₹${ DecimalFormat("#,##,###").format((gstPrice).toDouble()) }", space = 110.dp)
+                    RowComp(title = "Total Price:", price = "₫${ DecimalFormat("#,###").format((gstPrice).toDouble()) }", space = 110.dp)
                 }
             }
 
