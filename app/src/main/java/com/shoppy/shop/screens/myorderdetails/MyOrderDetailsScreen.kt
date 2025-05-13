@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,10 +51,15 @@ import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.components.BackButton
 import com.shoppy.shop.components.PillButton
 import com.shoppy.shop.components.ProgressBox
+import com.shoppy.shop.components.RatingStars
 import com.shoppy.shop.components.RatingSubmissionForm
+import com.shoppy.shop.models.MRating
 import com.shoppy.shop.navigation.BottomNavScreens
 import com.shoppy.shop.ui.theme.roboto
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun MyOrderDetailsScreen(navController: NavController,
@@ -76,11 +82,20 @@ fun MyOrderDetailsScreen(navController: NavController,
     val canUserRate = remember { mutableStateOf(false) }
     val isOrderDelivered = status == "Delivered"
     
-    // Check if user can rate this product
+    // Store the user's rating for this product if they've already rated it
+    val userRating = remember { mutableStateOf<MRating?>(null) }
+    
+    // Check if user can rate this product and get their existing rating if any
     LaunchedEffect(Unit) {
         if (isOrderDelivered) {
+            // Check if user can rate
             viewModel.checkIfUserCanRateProduct(product_id) { canRate ->
                 canUserRate.value = canRate
+            }
+            
+            // Get user's existing rating for this product if they've already rated
+            viewModel.getUserRatingForProduct(product_id) { rating ->
+                userRating.value = rating
             }
         }
     }
@@ -454,35 +469,115 @@ fun MyOrderDetailsScreen(navController: NavController,
                 }
             }
             
-            // Rating section - only show for delivered orders that haven't been rated yet
-            if (isOrderDelivered && canUserRate.value) {
+            // Rating section - only show for delivered orders
+            if (isOrderDelivered) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 20.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+                
+                // Show rating form if user can rate
+                if (canUserRate.value) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 20.dp),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(
-                            text = "Rate This Product",
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = roboto
-                            ),
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        
-                        RatingSubmissionForm(
-                            productId = product_id,
-                            onRatingSubmitted = {
-                                Toast.makeText(context, "Thank you for your rating!", Toast.LENGTH_SHORT).show()
-                                canUserRate.value = false
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Rate This Product",
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = roboto
+                                ),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            
+                            RatingSubmissionForm(
+                                productId = product_id,
+                                onRatingSubmitted = {
+                                    Toast.makeText(context, "Thank you for your rating!", Toast.LENGTH_SHORT).show()
+                                    canUserRate.value = false
+                                    
+                                    // Get the newly submitted rating
+                                    viewModel.getUserRatingForProduct(product_id) { rating ->
+                                        userRating.value = rating
+                                    }
+                                }
+                            )
+                        }
+                    }
+                } 
+                // Show existing rating if user has already rated
+                else if (userRating.value != null) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 20.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Your Rating",
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = roboto
+                                ),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                userRating.value?.let { rating ->
+                                    RatingStars(
+                                        rating = rating.rating_value?.toFloat() ?: 0f,
+                                        starSize = 24,
+                                        showRatingText = true
+                                    )
+                                }
                             }
-                        )
+                            
+                            userRating.value?.comment?.let { comment ->
+                                if (comment.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = Color.LightGray.copy(alpha = 0.2f)
+                                    ) {
+                                        Text(
+                                            text = comment,
+                                            style = TextStyle(
+                                                fontSize = 14.sp,
+                                                fontFamily = roboto
+                                            ),
+                                            modifier = Modifier.padding(12.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            // Show when the rating was submitted
+                            userRating.value?.timestamp?.let { timestamp ->
+                                val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                                val formattedDate = dateFormatter.format(Date(timestamp))
+                                
+                                Text(
+                                    text = "Submitted on $formattedDate",
+                                    style = TextStyle(
+                                        fontSize = 12.sp,
+                                        color = Color.Gray,
+                                        fontFamily = roboto
+                                    ),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

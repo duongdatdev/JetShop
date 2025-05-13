@@ -95,6 +95,62 @@ fun RatingStars(
 }
 
 @Composable
+fun RatingStars(
+    rating: Float,
+    starSize: Int,
+    showRatingText: Boolean
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val starColor = Color(0xFFFFC107)
+
+        // Filled stars
+        repeat(rating.toInt()) {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = "Rating Star",
+                tint = starColor,
+                modifier = Modifier.size(starSize.dp)
+            )
+        }
+
+        // Half star (if applicable)
+        if (rating - rating.toInt() >= 0.5f) {
+            // TODO: Implement half star if needed. For now, we'll round up.
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = "Rating Star",
+                tint = starColor,
+                modifier = Modifier.size(starSize.dp)
+            )
+        }
+
+        // Empty stars
+        repeat(5 - kotlin.math.ceil(rating).toInt()) {
+            Icon(
+                imageVector = Icons.Outlined.Star,
+                contentDescription = "Empty Star",
+                tint = starColor,
+                modifier = Modifier.size(starSize.dp)
+            )
+        }
+
+        if (showRatingText) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = String.format("%.1f", rating),
+                style = TextStyle(
+                    fontSize = (starSize - 2).sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = roboto
+                )
+            )
+        }
+    }
+}
+
+@Composable
 fun RatingSubmissionForm(
     productId: String,
     viewModel: RatingViewModel = hiltViewModel(),

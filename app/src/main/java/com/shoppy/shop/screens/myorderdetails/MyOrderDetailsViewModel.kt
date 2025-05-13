@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.shoppy.shop.data.DataOrException
 import com.shoppy.shop.models.MRating
 import com.shoppy.shop.repository.RatingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,6 +48,37 @@ class MyOrderDetailsViewModel @Inject constructor(
                 callback(canRate)
             } catch (e: Exception) {
                 callback(false)
+            }
+        }
+    }
+    
+    fun getUserRatingForProduct(productId: String, callback: (MRating?) -> Unit) {
+        viewModelScope.launch {
+            if (currentUser?.uid == null) {
+                callback(null)
+                return@launch
+            }
+            
+            try {
+                // Query Firestore to get the user's rating for this product
+                db.collection("Ratings")
+                    .whereEqualTo("user_id", currentUser.uid)
+                    .whereEqualTo("product_id", productId)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (documents.isEmpty) {
+                            callback(null)
+                        } else {
+                            val ratingDoc = documents.documents.first()
+                            val rating = ratingDoc.toObject(MRating::class.java)
+                            callback(rating)
+                        }
+                    }
+                    .addOnFailureListener {
+                        callback(null)
+                    }
+            } catch (e: Exception) {
+                callback(null)
             }
         }
     }
