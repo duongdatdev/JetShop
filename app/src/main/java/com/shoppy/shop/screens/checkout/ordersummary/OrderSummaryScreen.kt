@@ -49,26 +49,33 @@ import com.shoppy.shop.ui.theme.roboto
 import java.text.DecimalFormat
 
 @Composable
-fun OrderSummaryScreen(navController: NavHostController,viewModel: OrderSummaryScreenViewModel = hiltViewModel()) {
+fun OrderSummaryScreen(navController: NavHostController, viewModel: OrderSummaryScreenViewModel = hiltViewModel(), buyNowId: String? = null) {
 
     var cartList = emptyList<MCart>()
-
+    val isBuyNow = buyNowId != null
     val userId = FirebaseAuth.getInstance().currentUser?.uid
-
-    if (!viewModel.fireSummary.value.data.isNullOrEmpty()){
-
-        cartList = viewModel.fireSummary.value.data!!.toList().filter { mCart ->
-
-        mCart.user_id == userId
+    val totalAmount = remember { mutableStateOf(0) }
+    
+    // Handle Buy Now mode by fetching the specific item
+    if (isBuyNow && buyNowId != null) {
+        viewModel.getBuyNowItem(buyNowId)
+        
+        // If we have a Buy Now item, convert it to a list with one item
+        val buyNowItemState = viewModel.buyNowItem.value
+        if (!buyNowItemState.loading!! && buyNowItemState.data != null) {
+            cartList = listOf(buyNowItemState.data!!)
+            totalAmount.value = buyNowItemState.data!!.product_price ?: 0
+        }
+    } else {
+        // Regular cart flow
+        if (!viewModel.fireSummary.value.data.isNullOrEmpty()){
+            cartList = viewModel.fireSummary.value.data!!.toList().filter { mCart ->
+                mCart.user_id == userId
+            }
         }
     }
     
-    val totalAmount = remember { mutableStateOf(0) }
-
     val gstPrice = totalAmount.value + (100 * cartList.size) + 180 // Rs180 is GST price i.e 18%
-
-//    viewModel.getEmailPhone(email = {})
-
 
     val constraints = ConstraintSet {
         val progressCard = createRefFor(id = "ProgressCard")
@@ -104,7 +111,7 @@ fun OrderSummaryScreen(navController: NavHostController,viewModel: OrderSummaryS
     }
 
     Scaffold(topBar = { BackButton(navController = navController, topBarTitle = "Order Summary", spacing = 60.dp) },
-        backgroundColor = ShopKartUtils.offWhite, bottomBar = { SummaryBottomBar(totalAmount = totalAmount.value,navController = navController) }) { innerPadding ->
+        backgroundColor = ShopKartUtils.offWhite, bottomBar = { SummaryBottomBar(totalAmount = totalAmount.value, navController = navController, buyNowId = buyNowId) }) { innerPadding ->
 
         ConstraintLayout(constraintSet = constraints, modifier = Modifier.padding(innerPadding).fillMaxSize(), animateChanges = true) {
 
@@ -158,18 +165,18 @@ fun OrderSummaryScreen(navController: NavHostController,viewModel: OrderSummaryS
             }
 
             OrderSummaryCard(cardList = cartList, viewModel = viewModel, modifier = Modifier.layoutId("ItemsLazyList")){ price ->
-
-                totalAmount.value = price
-
+                if (!isBuyNow) {
+                    totalAmount.value = price
+                }
             }
-
         }
     }
 }
 
 @Composable
-fun SummaryBottomBar(totalAmount:Int,navController: NavController){
-
+fun SummaryBottomBar(totalAmount: Int, navController: NavController, buyNowId: String? = null){
+    val finalPrice = totalAmount + 280 // 100 delivery + 180 GST
+    
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(120.dp)) {
@@ -182,10 +189,15 @@ fun SummaryBottomBar(totalAmount:Int,navController: NavController){
                 Text(text = "Note: ₹100 fee is applied for all the items in the cart", modifier = Modifier.padding(start = 5.dp) ,style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = roboto), color = Color.Black.copy(alpha = 0.5f))
             }
 
-            //280 is price with delivery charge and GST 100 + 180
-            PillButton(title = "Continue", color = ShopKartUtils.black.toInt()){ navController.navigate(BottomNavScreens.PaymentScreen.route + "/${totalAmount + 280}") }
+            PillButton(title = "Continue", color = ShopKartUtils.black.toInt()){ 
+                // If buy now, pass the ID to the payment screen
+                if (buyNowId != null) {
+                    navController.navigate("${BottomNavScreens.PaymentScreen.route}/${finalPrice}?buyNowId=$buyNowId") 
+                } else {
+                    navController.navigate("${BottomNavScreens.PaymentScreen.route}/${finalPrice}")
+                }
+            }
         }
-
     }
 }
 

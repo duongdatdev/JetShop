@@ -157,10 +157,10 @@ fun BottomNavigation(
             )
         }
 
-        val myOrderDetails = BottomNavScreens.MyOrderDetails.route
         composable(
-            "$myOrderDetails/{status}/{product_title}/{product_url}/{product_price}/{quantity}/{payment_method}/{order_id}/{order_date}",
+            route = BottomNavScreens.MyOrderDetails.route + "/{status}/{product_title}/{product_url}/{product_price}/{quantity}/{payment_method}/{order_id}/{order_date}/{product_id}",
             arguments = listOf(
+
                 navArgument("status") {
                     type = NavType.StringType
                 },
@@ -192,6 +192,10 @@ fun BottomNavigation(
                 navArgument("order_date") {
                     type = NavType.StringType
                 },
+                
+                navArgument("product_id") {
+                    type = NavType.StringType
+                },
             )
         ) { bacStack ->
             val status = bacStack.arguments?.getString("status")
@@ -202,6 +206,7 @@ fun BottomNavigation(
             val paymentMethod = bacStack.arguments?.getString("payment_method")
             val orderId = bacStack.arguments?.getString("order_id")
             val orderDate = bacStack.arguments?.getString("order_date")
+            val productId = bacStack.arguments?.getString("product_id")
             MyOrderDetailsScreen(
                 navController = navController,
                 status = status!!,
@@ -211,30 +216,60 @@ fun BottomNavigation(
                 quantity = quantity!!,
                 payment_method = paymentMethod!!,
                 order_id = orderId!!,
-                order_date = orderDate!!
+                order_date = orderDate!!,
+                product_id = productId!!
             )
         }
 
-
-        composable(BottomNavScreens.AddressScreen.route) {
-            AddressScreen(navController = navController)
+        composable(
+            route = "${BottomNavScreens.AddressScreen.route}?buyNowId={buyNowId}",
+            arguments = listOf(
+                navArgument("buyNowId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val buyNowId = backStackEntry.arguments?.getString("buyNowId")
+            AddressScreen(navController = navController, buyNowId = buyNowId)
         }
 
         composable(BottomNavScreens.EditAddressScreen.route) {
             EditAddressScreen(navController = navController)
         }
 
-        composable(BottomNavScreens.OrderSummaryScreen.route) {
-            OrderSummaryScreen(navController = navController)
+        composable(
+            route = "${BottomNavScreens.OrderSummaryScreen.route}?buyNowId={buyNowId}",
+            arguments = listOf(
+                navArgument("buyNowId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val buyNowId = backStackEntry.arguments?.getString("buyNowId")
+            OrderSummaryScreen(navController = navController, buyNowId = buyNowId)
         }
 
         val paymentScreen = BottomNavScreens.PaymentScreen.route
-        composable("$paymentScreen/{totalAmount}", arguments = listOf(navArgument("totalAmount") {
-            type = NavType.IntType
-        })) { backStack ->
-            backStack.arguments?.getInt("totalAmount")
-                .let { PaymentScreen(navController = navController, totalAmount = it!!) }
-
+        composable(
+            route = "$paymentScreen/{totalAmount}?buyNowId={buyNowId}", 
+            arguments = listOf(
+                navArgument("totalAmount") {
+                    type = NavType.IntType
+                },
+                navArgument("buyNowId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStack ->
+            val totalAmount = backStack.arguments?.getInt("totalAmount") ?: 0
+            val buyNowId = backStack.arguments?.getString("buyNowId")
+            PaymentScreen(navController = navController, totalAmount = totalAmount, buyNowId = buyNowId)
         }
 
         composable(BottomNavScreens.OrderSuccessScreen.route) {

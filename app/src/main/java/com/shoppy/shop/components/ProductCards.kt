@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -128,6 +129,22 @@ fun CardItem(
                     .padding(bottom = 4.dp, start = 12.dp, end = 10.dp)
                     .align(Alignment.Start)
             )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(start = 12.dp, bottom = 4.dp)
+                    .align(Alignment.Start)
+            ) {
+                // Show rating if available
+                if ((mProducts.rating_count ?: 0) > 0) {
+                    RatingStars(
+                        rating = mProducts.average_rating ?: 0f,
+                        starSize = 12,
+                        showRatingText = true
+                    )
+                }
+            }
 
             Text(
                 text = "Price", style = TextStyle(fontSize = 10.sp, fontFamily = roboto),

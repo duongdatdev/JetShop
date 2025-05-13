@@ -68,17 +68,32 @@ import java.text.DecimalFormat
 fun PaymentScreen(
     totalAmount: Int,
     navController: NavHostController,
-    viewModel: OrderSummaryScreenViewModel = hiltViewModel()
+    viewModel: OrderSummaryScreenViewModel = hiltViewModel(),
+    buyNowId: String? = null
 ) {
 
     val options = listOf("Cash On Delivery", "Credit/Debit Card")
 
     var itemList = emptyList<MCart>()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
-
-    //Filtering cart items to store in "Orders" collection (not displayed on ui)
-    itemList = viewModel.fireSummary.value.data!!.toList().filter { mCart ->
-        userId == mCart.user_id
+    
+    // Check if we're in buy now mode
+    val isBuyNow = buyNowId != null
+    
+    if (isBuyNow && buyNowId != null) {
+        // If we have a Buy Now item, get it from the viewModel
+        val buyNowItemState = viewModel.buyNowItem.value
+        if (!buyNowItemState.loading!! && buyNowItemState.data != null) {
+            itemList = listOf(buyNowItemState.data!!)
+        } else {
+            // If not loaded yet, try to load it
+            viewModel.getBuyNowItem(buyNowId)
+        }
+    } else {
+        // Regular cart flow - filter cart items
+        itemList = viewModel.fireSummary.value.data!!.toList().filter { mCart ->
+            userId == mCart.user_id
+        }
     }
 
     //Payment Method (Cash Or Card)
@@ -157,7 +172,8 @@ fun PaymentScreen(
                 deliveryStatus = deliveryStatus.value,
                 itemsList = itemList,
                 viewModel = viewModel,
-                navController = navController
+                navController = navController,
+                buyNowId = buyNowId
             )
         }) { innerPadding ->
 
@@ -380,10 +396,11 @@ fun PaymentBottomBar(
     deliveryStatus: String,
     itemsList: List<MCart>,
     viewModel: OrderSummaryScreenViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    buyNowId: String? = null
 ) {
-
     val context = LocalContext.current
+    val isBuyNow = buyNowId != null
 
     Column(
         verticalArrangement = Arrangement.SpaceAround,
@@ -393,7 +410,6 @@ fun PaymentBottomBar(
             .height(120.dp)
             .background(Color.White)
     ) {
-
         Text(
             text = "Total Amount: ₫${
                 DecimalFormat("#,###").format(
@@ -408,42 +424,33 @@ fun PaymentBottomBar(
             color = ShopKartUtils.black.toInt(),
             modifier = Modifier.padding(top = 5.dp)
         ) {
-
             if (selectedOption == "Credit/Debit Card") {
                 if (creditCard == "4532804020291443" && expiry == "5/2027" && cvv == "633") {
-
-                    //Uploading items and payment method to Orders collection
-                    viewModel.uploadToOrdersAndDeleteCart(
+                    processOrder(
+                        isBuyNow = isBuyNow,
+                        buyNowId = buyNowId,
                         itemsList = itemsList,
                         paymentMethod = selectedOption,
-                        deliveryStatus = deliveryStatus
-                    ) {
-
-                        navController.navigate(BottomNavScreens.OrderSuccessScreen.route) {
-                            popUpTo(
-                                id = navController.graph.findStartDestination().id
-                            )
-                        }
-                    }
-
+                        deliveryStatus = deliveryStatus,
+                        viewModel = viewModel,
+                        navController = navController
+                    )
                 } else {
                     Toast.makeText(context, "Payment Error", Toast.LENGTH_SHORT).show()
                 }
             } else if (selectedOption == "Cash On Delivery") {
-
-                //Uploading items and payment method to Orders collection
-                viewModel.uploadToOrdersAndDeleteCart(
+                processOrder(
+                    isBuyNow = isBuyNow,
+                    buyNowId = buyNowId,
                     itemsList = itemsList,
                     paymentMethod = selectedOption,
-                    deliveryStatus = deliveryStatus
-                ) {
-
-                    //Navigating to OrderSuccess Screen and popping all previous screens till Home Screen
-                    navController.navigate(BottomNavScreens.OrderSuccessScreen.route) { popUpTo(id = navController.graph.findStartDestination().id) }
-                }
-
+                    deliveryStatus = deliveryStatus,
+                    viewModel = viewModel,
+                    navController = navController
+                )
             }
         }
+        
         Text(
             text = "Secured By ShopKart",
             style = TextStyle(
@@ -453,6 +460,40 @@ fun PaymentBottomBar(
                 color = Color.Black.copy(alpha = 0.5f)
             )
         )
+    }
+}
+
+private fun processOrder(
+    isBuyNow: Boolean,
+    buyNowId: String?,
+    itemsList: List<MCart>,
+    paymentMethod: String,
+    deliveryStatus: String,
+    viewModel: OrderSummaryScreenViewModel,
+    navController: NavHostController
+) {
+    if (isBuyNow && buyNowId != null) {
+        // Process Buy Now item
+        viewModel.uploadBuyNowItemToOrders(
+            buyNowId = buyNowId,
+            paymentMethod = paymentMethod,
+            deliveryStatus = deliveryStatus
+        ) {
+            navController.navigate(BottomNavScreens.OrderSuccessScreen.route) {
+                popUpTo(id = navController.graph.findStartDestination().id)
+            }
+        }
+    } else {
+        // Process regular cart items
+        viewModel.uploadToOrdersAndDeleteCart(
+            itemsList = itemsList,
+            paymentMethod = paymentMethod,
+            deliveryStatus = deliveryStatus
+        ) {
+            navController.navigate(BottomNavScreens.OrderSuccessScreen.route) {
+                popUpTo(id = navController.graph.findStartDestination().id)
+            }
+        }
     }
 }
 

@@ -11,6 +11,7 @@ import com.shoppy.shop.repository.FireOrderRepository
 import com.shoppy.shop.repository.FireOrderStatusRepository
 import com.shoppy.shop.repository.FireRepository
 import com.shoppy.shop.repository.FireSearchRepository
+import com.shoppy.shop.repository.RatingRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -95,6 +96,12 @@ object AppModule {
     @Provides
     fun providesGetEmployeeAttendanceFromFB()
     = FireAttendanceRepository(queryAttendance = FirebaseFirestore.getInstance().collection("Attendance"))
+
+    @Singleton
+    @Provides
+    fun providesRatingRepository(): RatingRepository {
+        return RatingRepository(FirebaseFirestore.getInstance())
+    }
 
     //Notification API
     @Singleton

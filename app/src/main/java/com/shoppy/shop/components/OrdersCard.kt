@@ -139,7 +139,7 @@ fun OrdersCardItem(mOrder: MOrder, navController: NavController) {
             .fillMaxWidth()
             .height(120.dp)
             .padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 8.dp)
-            .clickable { navController.navigate(BottomNavScreens.MyOrderDetails.route + "/${mOrder.delivery_status}/${mOrder.product_title}/${encodeUrl}/${mOrder.product_price}/${mOrder.item_count}/${decodePaymentMethod}/${mOrder.order_id}/${mOrder.order_date}") },
+            .clickable { navController.navigate(BottomNavScreens.MyOrderDetails.route + "/${mOrder.delivery_status}/${mOrder.product_title}/${encodeUrl}/${mOrder.product_price}/${mOrder.item_count}/${decodePaymentMethod}/${mOrder.order_id}/${mOrder.order_date}/${mOrder.product_id}") },
         shape = RoundedCornerShape(12.dp)
     ) {
 

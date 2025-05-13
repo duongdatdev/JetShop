@@ -63,19 +63,30 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getUserNameAndImage(profile_image: (String?) -> Unit, user: (String?) -> Unit) {
-
         val email = mAuth.currentUser?.email
-//        val userType = if (email!!.contains("employee.")) "Employees" else "Users"
 
-        //Giving empty string if employee account is logged in else get username and profile image from "Users"
-        if (email!!.contains("employee.")) {
+        // Check if user is logged in and has an email
+        if (email == null) {
+            // Handle case when no user is logged in
+            user("")
+            profile_image("")
+            return
+        }
+
+        // Now that we've confirmed email is not null
+        if (email.contains("employee.")) {
             user("")
             profile_image("")
         } else {
             FirebaseFirestore.getInstance().collection("Users").document(email).get()
                 .addOnSuccessListener { document ->
-                    user(document.data?.getValue("name").toString())
-                    profile_image(document.data?.getValue("profile_image").toString())
+                    user(document.data?.getValue("name")?.toString() ?: "")
+                    profile_image(document.data?.getValue("profile_image")?.toString() ?: "")
+                }
+                .addOnFailureListener {
+                    // Handle potential failure
+                    user("")
+                    profile_image("")
                 }
         }
     }

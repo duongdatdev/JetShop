@@ -42,7 +42,7 @@ import com.shoppy.shop.navigation.BottomNavScreens
 import com.shoppy.shop.ui.theme.roboto
 
 @Composable
-fun AddressScreen(navController: NavController,viewModel: AddressViewModel = androidx.lifecycle.viewmodel.compose.viewModel()){
+fun AddressScreen(navController: NavController, viewModel: AddressViewModel = androidx.lifecycle.viewmodel.compose.viewModel(), buyNowId: String? = null){
 
     val address = remember { mutableStateOf("") }
     val name = remember { mutableStateOf("") }
@@ -129,7 +129,13 @@ fun AddressScreen(navController: NavController,viewModel: AddressViewModel = and
                 }else if (phone.value.isEmpty()){
                     Toast.makeText(context,"Add Phone number",Toast.LENGTH_LONG).show()
                 }else{
-                navController.navigate(BottomNavScreens.OrderSummaryScreen.route) }
+                    // If it's a buy now purchase, pass the buyNowId to the OrderSummaryScreen
+                    if (buyNowId != null) {
+                        navController.navigate("${BottomNavScreens.OrderSummaryScreen.route}?buyNowId=$buyNowId")
+                    } else {
+                        navController.navigate(BottomNavScreens.OrderSummaryScreen.route)
+                    }
+                }
             }
         }
     }

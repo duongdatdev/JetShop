@@ -179,7 +179,7 @@ fun ShopKartAppBar2(userName: String?, profile_url: String?, navHostController: 
             .size(40.dp)
             .clip(RoundedCornerShape(10.dp))){
 
-            Image(painter = painterResource(id = R.drawable.logo), contentDescription = "ShopKart Logo" )
+            Image(painter = painterResource(id = R.drawable.icon_d), contentDescription = "ShopKart Logo" )
         }
 
         Text(text = "ShopKart", style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto), modifier = Modifier.layoutId("ShopKart"))

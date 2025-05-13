@@ -9,7 +9,9 @@ data class MProducts(
     var category: String? = null,
     var product_id: String? = null,
     val shop_id: String? = null,
-    val shop_name: String? = null
+    val shop_name: String? = null,
+    var average_rating: Float? = 0f,
+    var rating_count: Int? = 0
 ) {
 
     fun convertToMap(): MutableMap<String,Any>{
@@ -29,7 +31,9 @@ data class MProducts(
 
             "product_id" to this.product_id!!,
             "shop_id" to this.shop_id!!,
-            "shop_name" to this.shop_name!!
+            "shop_name" to this.shop_name!!,
+            "average_rating" to (this.average_rating ?: 0f),
+            "rating_count" to (this.rating_count ?: 0)
         )
     }
 }

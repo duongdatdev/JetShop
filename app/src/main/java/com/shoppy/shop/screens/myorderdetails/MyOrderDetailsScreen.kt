@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,12 +26,14 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -39,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.shoppy.shop.R
@@ -46,6 +50,7 @@ import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.components.BackButton
 import com.shoppy.shop.components.PillButton
 import com.shoppy.shop.components.ProgressBox
+import com.shoppy.shop.components.RatingSubmissionForm
 import com.shoppy.shop.navigation.BottomNavScreens
 import com.shoppy.shop.ui.theme.roboto
 import java.text.DecimalFormat
@@ -60,11 +65,25 @@ fun MyOrderDetailsScreen(navController: NavController,
                          payment_method: String,
                          order_id: String,
                          order_date: String,
-                         viewModel: MyOrderDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+                         product_id: String,
+                         viewModel: MyOrderDetailsViewModel = hiltViewModel()) {
 
     val name = remember { mutableStateOf("") }
     val phone = remember { mutableStateOf("") }
     val address = remember { mutableStateOf("") }
+    
+    // Track if the user can rate this product
+    val canUserRate = remember { mutableStateOf(false) }
+    val isOrderDelivered = status == "Delivered"
+    
+    // Check if user can rate this product
+    LaunchedEffect(Unit) {
+        if (isOrderDelivered) {
+            viewModel.checkIfUserCanRateProduct(product_id) { canRate ->
+                canUserRate.value = canRate
+            }
+        }
+    }
 
     viewModel.getAddressNamePhone(
         name = { name.value = it },
@@ -95,50 +114,34 @@ fun MyOrderDetailsScreen(navController: NavController,
             verticalArrangement = Arrangement.Top
         ) {
 
-            //Changing status color according to delivery_status
-            val ordered = ShopKartUtils.blue
-            var onTheWay = Color.Gray
-            var delivered = Color.Gray
-
-            if (status == "On The Way") {
-                onTheWay = ShopKartUtils.blue
-            } else if (status == "Delivered") {
-                onTheWay = ShopKartUtils.blue
-                delivered = ShopKartUtils.blue
-            }
-
-            //Progress Indicator 1-2-3
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 20.dp)
-                    .height(80.dp),
-                elevation = 2.dp,
-                color = Color.White
-            ) {
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-
-                    ProgressBox(number = "1", title = "Ordered", color = ordered)
-                    Divider(
-                        modifier = Modifier
-                            .height(2.dp)
-                            .width(50.dp)
-                    )
-                    ProgressBox(number = "2", title = "On The Way", color = onTheWay)
-                    Divider(
-                        modifier = Modifier
-                            .height(2.dp)
-                            .width(50.dp)
-                    )
-                    ProgressBox(number = "3", title = "Delivered", color = delivered)
-                }
+            // Alert Dialog to cancel order
+            if (openDialog.value) {
+                AlertDialog(
+                    onDismissRequest = { openDialog.value = false },
+                    title = { Text(text = "Cancel Order?", style = TextStyle(fontWeight = FontWeight.Bold)) },
+                    text = { Text(text = "Are you sure you want to cancel this order?", style = TextStyle(fontWeight = FontWeight.Normal)) },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.cancelOrder(product_title)
+                                openDialog.value = false
+                                Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            },
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White)
+                        ) {
+                            Text(text = "Yes", style = TextStyle(fontWeight = FontWeight.Bold))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { openDialog.value = false },
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray, contentColor = Color.Black)
+                        ) {
+                            Text(text = "No", style = TextStyle(fontWeight = FontWeight.Bold))
+                        }
+                    }
+                )
             }
 
             //Product Image Card
@@ -221,46 +224,51 @@ fun MyOrderDetailsScreen(navController: NavController,
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
 
-
                         Text(
-                            text = "₫${DecimalFormat("#,###").format(((product_price - 280) / quantity).toDouble())}",
+                            text = "Qty: $quantity",
                             style = TextStyle(
-                                fontSize = 18.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = roboto
                             )
                         )
 
                         Text(
-                            text = "Quantity: $quantity",
+                            text = "₹${DecimalFormat("#,##,###").format(product_price.toDouble())}",
                             style = TextStyle(
-                                fontSize = 18.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = roboto
                             )
                         )
                     }
-
-
                 }
-
             }
 
-            //Order Details Card
+            //If order status is ordered then show cancel button
+            AnimatedVisibility(visible = status == "Ordered") {
+                PillButton(
+                    title = "Cancel Order",
+                    color = Color.Red.toArgb(),
+                    onClick = { openDialog.value = true }
+                )
+            }
+
+            //Order Address Card
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp)
-                    .padding(top = 20.dp, start = 20.dp, end = 20.dp),
+                    .height(200.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 10.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
 
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Center
+                        .padding(15.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.Start
                 ) {
 
                     Text(
@@ -308,22 +316,22 @@ fun MyOrderDetailsScreen(navController: NavController,
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(15.dp),
+                    .height(170.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 10.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
 
                 Column(
                     modifier = Modifier
-                        .padding(20.dp)
+                        .padding(15.dp)
                         .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.SpaceEvenly,
                     horizontalAlignment = Alignment.Start
                 ) {
 
                     Text(
                         text = "Shipping Address",
-                        modifier = Modifier.padding(bottom = 8.dp),
+                        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -331,22 +339,25 @@ fun MyOrderDetailsScreen(navController: NavController,
                         ),
                         color = Color.Black.copy(alpha = 0.5f)
                     )
+
                     Text(
-                        text = name.value,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = roboto
-                        )
-                    )
-                    Text(
-                        text = address.value,
+                        text = "Name: ${name.value}",
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = roboto
                         )
                     )
+
+                    Text(
+                        text = "Address: ${address.value}",
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = roboto
+                        )
+                    )
+
                     Text(
                         text = "Phone no: ${phone.value}",
                         style = TextStyle(
@@ -364,7 +375,7 @@ fun MyOrderDetailsScreen(navController: NavController,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
-                    .padding(start = 20.dp, end = 20.dp),
+                    .padding(start = 20.dp, end = 20.dp, top = 10.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
 
@@ -378,7 +389,7 @@ fun MyOrderDetailsScreen(navController: NavController,
 
                     Text(
                         text = "Price Details",
-                        modifier = Modifier.padding(bottom = 8.dp),
+                        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -386,108 +397,98 @@ fun MyOrderDetailsScreen(navController: NavController,
                         ),
                         color = Color.Black.copy(alpha = 0.5f)
                     )
-                    Text(
-                        //280 is price with delivery charge and GST 100 + 180
-                        text = "Item Price: ₫${DecimalFormat("#,###").format(((product_price - 280) / quantity).toDouble())}",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = roboto
-                        )
-                    )
-                    Text(
-                        text = "Delivery Fee: ₫100",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = roboto
-                        )
-                    )
 
-                    Text(
-                        text = "GST: 18%",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = roboto
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Text(
+                            text = "Price",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = roboto
+                            )
                         )
-                    )
-                    Text(
-                        text = "Payment Method: $payment_method",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = roboto
+
+                        Text(
+                            text = "₹${DecimalFormat("#,##,###").format((product_price - 280).toDouble())}",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = roboto
+                            )
                         )
-                    )
-                    Text(
-                        text = "Total Price: ₫${DecimalFormat("#,###").format(product_price.toDouble())} (Incl. all taxes)",
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = roboto
+
+                    }
+
+                    Divider(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Text(
+                            text = "Total Payment",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = roboto
+                            )
                         )
-                    )
+
+                        Text(
+                            text = "₹${DecimalFormat("#,##,###").format(product_price.toDouble())}",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = roboto
+                            )
+                        )
+
+                    }
                 }
-
             }
-
-            //Hiding Cancel Order Button if product is already Delivered Or Cancelled
-            val isEnabled = remember { mutableStateOf(true) }
-
-            if (status == "Delivered" || status == "Cancelled" || status == "On The Way") isEnabled.value = false
-
-            AnimatedVisibility(visible = isEnabled.value) {
-
-                PillButton(
-                    title = "Cancel Order", modifier = Modifier.padding(top = 30.dp, bottom = 20.dp), color = ShopKartUtils.black.toInt(), textColor = Color.Red) { openDialog.value = true }
+            
+            // Rating section - only show for delivered orders that haven't been rated yet
+            if (isOrderDelivered && canUserRate.value) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 20.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Rate This Product",
+                            style = TextStyle(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = roboto
+                            ),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        
+                        RatingSubmissionForm(
+                            productId = product_id,
+                            onRatingSubmitted = {
+                                Toast.makeText(context, "Thank you for your rating!", Toast.LENGTH_SHORT).show()
+                                canUserRate.value = false
+                            }
+                        )
+                    }
+                }
             }
-
-            //Calling Alert Dialog
-            ShopKartDialog(openDialog = openDialog,
-                onTap = { viewModel.cancelOrder(product_title = product_title)
-
-                    //Navigating back to Orders Screen to refresh and pop backstack
-                    navController.popBackStack()
-                    navController.navigate(BottomNavScreens.Orders.route)
-                        },
-                context = context,
-                navController = navController,
-                title = "Cancel Order",
-                subTitle = "Are You Sure, you want to cancel the order?",
-                button1 = "Confirm",
-                button2 = "Cancel",
-                toast = "Order Cancelled")
-
-//            Spacer(modifier = Modifier.height(120.dp))
+            
+            // Add some space at the bottom
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
-
-        //Cancel Order Alert Dialog
-        @Composable
-        fun ShopKartDialog(openDialog: MutableState<Boolean>, onTap: () -> Unit,context:Context,navController: NavController,title: String,subTitle: String,button1: String,button2: String,toast: String) {
-            if (openDialog.value) {
-                AlertDialog(
-                    onDismissRequest = { openDialog.value = false },
-                    title = { Text(text = title, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, fontFamily = roboto)) },
-                    text = { Text(text = subTitle, style = TextStyle(fontWeight = FontWeight.Bold, fontFamily = roboto)) },
-                    confirmButton = {
-                        TextButton(onClick = { onTap.invoke()
-                            openDialog.value = false
-                            Toast.makeText(context,toast,Toast.LENGTH_SHORT).show() },
-                            colors = ButtonDefaults.buttonColors(Color.Black),
-                            shape = RoundedCornerShape(12.dp)){ Text(text = button1, color = Color.White,style = TextStyle(fontSize = 12.sp,fontWeight = FontWeight.Bold, fontFamily = roboto)) }
-                                    },
-                    dismissButton = {
-                        TextButton(onClick = { openDialog.value = false },
-                            colors = ButtonDefaults.buttonColors(Color.Black),
-                            shape = RoundedCornerShape(12.dp)){ Text(text = button2, color = Color.White, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = roboto)) }
-                                    },
-                    shape = RoundedCornerShape(12.dp)
-                )
-            }
-        }
-
-//    }TextButton(onClick = {  }){ Text(text = "Cancel Order?") }
-//        TextButton(onClick = {  }){ Text(text = "Are You Sure, you want to cancel te order?") }

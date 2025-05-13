@@ -1,6 +1,7 @@
 package com.shoppy.shop.screens.profile
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -19,6 +20,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,7 +35,7 @@ import com.shoppy.shop.R
 import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.components.ProfileCards
 import com.shoppy.shop.navigation.BottomNavScreens
-import com.shoppy.shop.screens.myorderdetails.ShopKartDialog
+
 import com.shoppy.shop.utils.UserRoleManager
 
 //252.dp
@@ -209,4 +211,43 @@ fun ProfileScreen(navController: NavController,
         button2 = "Cancel",
         toast = "Logged Out")
 
+    // After
+
+
+}
+
+@Composable
+fun ShopKartDialog(
+    openDialog: MutableState<Boolean>,
+    onTap: () -> Unit,
+    context: Context,
+    navController: NavController,
+    title: String,
+    subTitle: String,
+    button1: String,
+    button2: String,
+    toast: String
+) {
+    if (openDialog.value) {
+        androidx.compose.material.AlertDialog(
+            onDismissRequest = { openDialog.value = false },
+            title = { androidx.compose.material.Text(text = title) },
+            text = { androidx.compose.material.Text(text = subTitle) },
+            confirmButton = {
+                androidx.compose.material.TextButton(onClick = {
+                    onTap()
+                    Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                    openDialog.value = false
+                }) {
+                    androidx.compose.material.Text(text = button1)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material.TextButton(onClick = { openDialog.value = false }) {
+                    androidx.compose.material.Text(text = button2)
+                }
+            }
+        )
+    }
 }
