@@ -18,7 +18,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -92,7 +94,8 @@ fun CardItem(
             Box(modifier = Modifier.height(115.dp)) {
                 AsyncImage(
                     model = mProducts.product_url, contentDescription = mProducts.product_title,
-                    modifier = Modifier.padding(8.dp),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.padding(8.dp).clip(shape = RoundedCornerShape(15.dp)),
                     placeholder = painterResource(id = R.drawable.placeholder)
                 )
             }
@@ -166,18 +169,3 @@ fun CardItem(
     }
 }
 
-@Preview
-@Composable
-private fun Previeww() {
-    ProductCard(
-        cardItem = listOf(
-            MProducts(
-                product_title = "POCO F4",
-                product_description = "POCO F4 Green 6/128GB",
-                product_price = 30000
-            )
-        ),
-        navController = rememberNavController(),
-        onAddToCartClick = { }
-    )
-}

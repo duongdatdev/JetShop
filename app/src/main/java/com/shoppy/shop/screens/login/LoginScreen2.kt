@@ -216,7 +216,7 @@ fun LoginScreen2(navController: NavController,viewModel: LoginViewModel =  andro
         }
     }
 
-    ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
+    ConstraintLayout(constraintSet = constraints, modifier = Modifier.fillMaxSize()) {
 
         Image(painter = painterResource(id = R.drawable.loginscreen), contentDescription = "Login Image",
             modifier = Modifier.layoutId("LoginImage").size(300.dp))

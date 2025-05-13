@@ -70,6 +70,7 @@ class EmployeeScreenViewModel @Inject constructor(
         viewModelScope.launch {
             if (selectedImageUris != null) {
                 val imageUrl = CloudinaryUtils.uploadImage(context, selectedImageUris)
+                Log.d("EmployeeScreenViewModel", "Image URL: $imageUrl")
                 if (imageUrl != null) {
                     val sliders = MSliders(slider_image = imageUrl).convertToMap()
                     db.collection("Sliders").add(sliders)
@@ -321,13 +322,13 @@ class EmployeeScreenViewModel @Inject constructor(
     }
 
     fun uploadShopLogo(
-        imageUri: Uri,
+        imageUri: Uri?,
         success: (String) -> Unit,
         error: (String) -> Unit
     ) {
         viewModelScope.launch {
             try {
-                val imageUrl = CloudinaryUtils.uploadImage(context, imageUri)
+                val imageUrl = CloudinaryUtils.uploadImage(context, imageUri!!)
                 Log.d("EmployeeScreenViewModel", "Uploaded image URL: $imageUrl")
                 if (imageUrl != null) {
                     success(imageUrl)

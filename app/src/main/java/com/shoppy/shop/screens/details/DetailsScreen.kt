@@ -135,14 +135,15 @@ fun DetailsScreen(
                 modifier = Modifier
                     .height(350.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(20.dp)),
 
             ) {
 
                 AsyncImage(
                     model = imageUrl, contentDescription = productTitle,
+                    contentScale = ContentScale.Crop,
                     placeholder = painterResource(R.drawable.placeholder),
-                    modifier = Modifier.padding(5.dp)
+                    modifier = Modifier.padding(5.dp).clip(shape = RoundedCornerShape(20.dp)),
                 )
             }
 

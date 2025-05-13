@@ -228,18 +228,10 @@ fun ShopKartAppBar2(userName: String?, profile_url: String?, navHostController: 
 
                 Icon(painter = painterResource(id = R.drawable.ic_search), contentDescription = "Search", tint = Color.Black.copy(alpha = 0.5f))
 
-                Text(text = "MacBook Pro", style = TextStyle(fontWeight = FontWeight.Normal, fontFamily = roboto), modifier = Modifier.padding(start = 20.dp), color = Color.Black.copy(alpha = 0.5f))
+                Text(text = "Search", style = TextStyle(fontWeight = FontWeight.Normal, fontFamily = roboto), modifier = Modifier.padding(start = 20.dp), color = Color.Black.copy(alpha = 0.5f))
 
             }
 
         }
     }
-}
-
-
-
-@Preview
-@Composable
-fun Prev(){
-    ShopKartAppBar2("Prasidh","", navHostController = rememberNavController())
 }

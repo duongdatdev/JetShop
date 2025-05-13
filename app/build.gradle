@@ -125,7 +125,8 @@ dependencies {
     implementation 'org.json:json:20210307'
 
     // Add in dependencies section
-    implementation 'com.cloudinary:cloudinary-android:2.2.0'
+    implementation libs.cloudinary.android
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Azure AI
     implementation libs.azure.ai.openai
