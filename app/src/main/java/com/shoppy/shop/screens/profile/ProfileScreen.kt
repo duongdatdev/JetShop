@@ -35,8 +35,10 @@ import com.shoppy.shop.R
 import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.components.ProfileCards
 import com.shoppy.shop.navigation.BottomNavScreens
-
+import com.shoppy.shop.navigation.NavScreens
+import com.shoppy.shop.utils.NotificationUtils
 import com.shoppy.shop.utils.UserRoleManager
+import kotlinx.coroutines.launch
 
 //252.dp
 @Composable
@@ -86,7 +88,14 @@ fun ProfileScreen(navController: NavController,
 //        }
 //    }
 
-    val surfaceHeight = if (isAdmin.value) 252.dp else if (isStaff.value) 192.dp else 250.dp
+    // Calculate surface height based on role and Android version
+    val baseHeight = if (isAdmin.value) 252.dp else if (isStaff.value) 192.dp else 250.dp
+    // Add height for new notification buttons
+    val additionalHeight = 120.dp
+    // Add height for permission toggle on Android 13+
+    val permissionToggleHeight = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) 60.dp else 0.dp
+    
+    val surfaceHeight = baseHeight + additionalHeight + permissionToggleHeight
 
     val openDialog = remember { mutableStateOf(false) }
 
@@ -159,6 +168,38 @@ fun ProfileScreen(navController: NavController,
                         Box{}
                     }
 
+                    // Add test notifications button
+                    ProfileCards(
+                        title = "Notifications",
+                        leadingIcon = R.drawable.ic_info,
+                        tint = Color(0xFF3F51B5),
+                        space = 165.dp
+                    ) {
+                        // Navigate to notifications screen
+                        navController.navigate(BottomNavScreens.Notifications.route)
+                    }
+                    
+                    Divider()
+                    
+                    // Add test notifications button
+//                    ProfileCards(
+//                        title = "Create Test Notification",
+//                        leadingIcon = R.drawable.ic_info,
+//                        tint = Color(0xFFFFC107),
+//                        space = 115.dp
+//                    ) {
+//                        // Create a test notification
+//                        scope.launch {
+//                            NotificationUtils.createTestNotification(
+//                                "Test Notification",
+//                                "This is a test notification message created from the profile screen."
+//                            )
+//                            Toast.makeText(context, "Test notification created", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+                    
+                    Divider()
+
                     ProfileCards(
                         title = "Log Out",
                         leadingIcon = R.drawable.ic_logout,
@@ -181,18 +222,20 @@ fun ProfileScreen(navController: NavController,
 
                     Divider()
 
-                    ProfileCards(
-                        title = "Notification",
-                        leadingIcon = R.drawable.notification,
-                        tint = Color(0xFFD5EC08),
-                        space = 122.dp,
-                        isChecked = hasNotificationPermission,
-                        showButton = true,
-                        isButtonEnabled = isButtonEnabled.value
-                    ) {
-//                        hasNotificationPermission.value = !hasNotificationPermission.value
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasNotificationPermission.value) permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-//                        navController.navigate(BottomNavScreens.About.route)
+                    // Notification permission toggle button - only for Android 13+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ProfileCards(
+                            title = "Notification Permission",
+                            leadingIcon = R.drawable.notification,
+                            tint = Color(0xFFD5EC08),
+                            space = 122.dp,
+                            isChecked = hasNotificationPermission,
+                            showButton = true,
+                            isButtonEnabled = isButtonEnabled.value
+                        ) {
+                            if (!hasNotificationPermission.value) 
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
                     }
                 }
 

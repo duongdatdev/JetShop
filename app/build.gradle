@@ -24,10 +24,15 @@ android {
         }
 
         // Add build config field for API key
-        buildConfigField "String", "API_AI_TOKEN", "\"${System.getenv("AZURE_AI_KEY") ?: ""}\""
+        buildConfigField "String", "API_AI_TOKEN", "\"${getLocalProperty('apiAIToken', '')}\""
         buildConfigField "String", "CLOUDINARY_CLOUD_NAME", "\"${getLocalProperty('cloudinary.cloud_name', '')}\""
         buildConfigField "String", "CLOUDINARY_API_KEY", "\"${getLocalProperty('cloudinary.api_key', '')}\""
         buildConfigField "String", "CLOUDINARY_API_SECRET", "\"${getLocalProperty('cloudinary.api_secret', '')}\""
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
     }
 
     buildTypes {
@@ -53,7 +58,13 @@ android {
                     "META-INF/io.netty.versions.properties",
                     "META-INF/AL2.0",
                     "META-INF/LGPL2.1",
-                    "META-INF/INDEX.LIST"
+                    "META-INF/INDEX.LIST",
+                    "META-INF/LICENSE-notice.md",
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE",
+                    "META-INF/NOTICE.md",
+                    "META-INF/NOTICE",
+                    "META-INF/DEPENDENCIES",
             ]
         }
     }
@@ -128,10 +139,10 @@ dependencies {
     implementation libs.cloudinary.android
     implementation(libs.androidx.work.runtime.ktx)
 
-    // Azure AI
-    implementation libs.azure.ai.openai
-    implementation libs.azure.core
-    implementation libs.azure.identity
+    // Azure AI SDK dependencies
+    implementation 'com.azure:azure-ai-inference:1.0.0-beta.4'
+    implementation 'com.azure:azure-core:1.45.0'
+    implementation 'com.azure:azure-core-http-netty:1.14.0'
 }
 
 // Function to get local properties

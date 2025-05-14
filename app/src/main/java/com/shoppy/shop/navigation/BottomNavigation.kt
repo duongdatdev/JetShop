@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.shoppy.shop.navigation.BottomNavScreens.AddProductSliderEmpl
 import com.shoppy.shop.screens.AboutScreen
+import com.shoppy.shop.screens.NotificationScreen
 import com.shoppy.shop.screens.admin.AddEmployee
 import com.shoppy.shop.screens.admin.AddProductSliderAdmin
 import com.shoppy.shop.screens.admin.AddRemoveBrandAdmin
@@ -24,6 +25,7 @@ import com.shoppy.shop.screens.admin.orderstatus.OnTheWayItems
 import com.shoppy.shop.screens.admin.orderstatus.OrderedItems
 import com.shoppy.shop.screens.cart.CartScreen
 import com.shoppy.shop.screens.cart.CartScreenViewModel
+import com.shoppy.shop.screens.checkout.OrderConfirmationScreen
 import com.shoppy.shop.screens.checkout.OrderSuccessScreen
 import com.shoppy.shop.screens.checkout.address.AddressScreen
 import com.shoppy.shop.screens.checkout.address.EditAddressScreen
@@ -272,6 +274,34 @@ fun BottomNavigation(
             PaymentScreen(navController = navController, totalAmount = totalAmount, buyNowId = buyNowId)
         }
 
+        val confirmationScreen = BottomNavScreens.OrderConfirmationScreen.route
+        composable(
+            route = "$confirmationScreen/{totalAmount}/{paymentMethod}?buyNowId={buyNowId}",
+            arguments = listOf(
+                navArgument("totalAmount") {
+                    type = NavType.IntType
+                },
+                navArgument("paymentMethod") {
+                    type = NavType.StringType
+                },
+                navArgument("buyNowId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStack ->
+            val totalAmount = backStack.arguments?.getInt("totalAmount") ?: 0
+            val paymentMethod = backStack.arguments?.getString("paymentMethod") ?: ""
+            val buyNowId = backStack.arguments?.getString("buyNowId")
+            OrderConfirmationScreen(
+                navController = navController, 
+                totalAmount = totalAmount, 
+                paymentMethod = paymentMethod,
+                buyNowId = buyNowId
+            )
+        }
+
         composable(BottomNavScreens.OrderSuccessScreen.route) {
             OrderSuccessScreen(navController = navController)
         }
@@ -358,6 +388,11 @@ fun BottomNavigation(
             val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
             val shopName = backStackEntry.arguments?.getString("shopName") ?: ""
             ShopScreen(navController = navController, shopId = shopId, shopName = shopName)
+        }
+
+        // Add notification screen route
+        composable(BottomNavScreens.Notifications.route) {
+            NotificationScreen(navController = navController)
         }
 
     }

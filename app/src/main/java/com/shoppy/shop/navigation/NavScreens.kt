@@ -5,7 +5,9 @@ enum class NavScreens {
     RegisterScreen,
     LoginScreen,
     MainScreenHolder,
-    ForgotPasswordScreen;
+    ForgotPasswordScreen,
+    NotificationScreen,
+    AIMessageScreen;
 
 //    companion object{
 //        fun fromRoute(route: String): NavScreens

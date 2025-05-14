@@ -8,14 +8,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,7 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -32,13 +40,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.firebase.auth.FirebaseAuth
 import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.utils.UserRoleManager
+import com.shoppy.shop.viewmodels.NotificationViewModel
 
 @Composable
-fun BottomNavBar(navHostController: NavHostController,
-                 onItemSelected:(BottomNavScreens) -> Unit) {
+fun BottomNavBar(
+    navHostController: NavHostController,
+    onItemSelected:(BottomNavScreens) -> Unit,
+    notificationViewModel: NotificationViewModel = hiltViewModel()
+) {
 
     val isAdmin = remember { mutableStateOf(false) }
     val isStaff = remember { mutableStateOf(false) }
+    
+    // Get unread notifications count
+    val unreadNotificationsCount by notificationViewModel.unreadNotificationsCount.collectAsState()
 
     LaunchedEffect(Unit) {
         isAdmin.value = UserRoleManager.isAdmin()
@@ -75,8 +90,16 @@ fun BottomNavBar(navHostController: NavHostController,
 
                 //Checking which screen is selected
                 val isSelected = currentScreen?.hierarchy?.any { it.route == item.route } == true
+                
+                // Show notification badge only on the home tab
+                val showBadge = item.route == BottomNavScreens.Home.route && unreadNotificationsCount > 0
 
-                BottomNavBarItems(item = item, isSelected = isSelected) {
+                BottomNavBarItems(
+                    item = item, 
+                    isSelected = isSelected,
+                    showBadge = showBadge,
+                    badgeCount = unreadNotificationsCount
+                ) {
                     onItemSelected(item)
                     navHostController.navigate(item.route) {
                         popUpTo(navHostController.graph.findStartDestination().id){saveState = true}
@@ -94,36 +117,59 @@ fun BottomNavBar(navHostController: NavHostController,
     }
 }
 
-    @Composable
-    fun BottomNavBarItems(
-        item: BottomNavScreens,
-        isSelected: Boolean,
-        onClick: () -> Unit = {}
+@Composable
+fun BottomNavBarItems(
+    item: BottomNavScreens,
+    isSelected: Boolean,
+    showBadge: Boolean = false,
+    badgeCount: Int = 0,
+    onClick: () -> Unit = {}
+) {
+    val contentColor = if (isSelected) Color.White else Color.Gray
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        val contentColor = if (isSelected) Color.White else Color.Gray
-
-        Column(verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally){
-
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable(onClick = onClick)
-                    .width(55.dp)
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(onClick = onClick)
+                .width(55.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp, start = 15.dp, end = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-
-                Column(
-                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp, start = 15.dp, end = 15.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                Icon(
+                    painter = painterResource(id = item.icon!!), 
+                    contentDescription = item.title,
+                    tint = contentColor
+                )
+            }
+            
+            // Notification Badge
+            if (showBadge && badgeCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .offset(x = 20.dp, y = (-2).dp)
+                        .clip(CircleShape)
+                        .background(Color.Red)
+                        .align(Alignment.TopEnd),
+                    contentAlignment = Alignment.Center
                 ) {
-
-                    Icon(
-                        painter = painterResource(id = item.icon!!), contentDescription = item.title,
-                        tint = contentColor)
+                    Text(
+                        text = if (badgeCount > 9) "9+" else badgeCount.toString(),
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
+        }
 
 //           AnimatedVisibility(visible = isSelected) {
 //
@@ -133,5 +179,5 @@ fun BottomNavBar(navHostController: NavHostController,
 //                    style = TextStyle(fontWeight = FontWeight.Bold)
 //                    )
 //            }
-        }
     }
+}

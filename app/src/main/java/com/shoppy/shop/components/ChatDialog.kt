@@ -15,11 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.shoppy.shop.ShopKartUtils
-
-data class ChatMessage(
-    val message: String,
-    val isUser: Boolean
-)
+import com.shoppy.shop.models.ChatMessage
 
 @Composable
 fun ChatDialog(
@@ -100,19 +96,19 @@ private fun ChatMessageItem(message: ChatMessage) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        contentAlignment = if (message.isUser) Alignment.CenterEnd else Alignment.CenterStart
+        contentAlignment = if (message.isFromUser) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         Card(
             modifier = Modifier
                 .widthIn(max = 300.dp)
                 .padding(4.dp),
-            backgroundColor = if (message.isUser) ShopKartUtils.blue else Color.LightGray,
+            backgroundColor = if (message.isFromUser) ShopKartUtils.blue else Color.LightGray,
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                text = message.message,
+                text = message.content,
                 modifier = Modifier.padding(8.dp),
-                color = if (message.isUser) Color.White else Color.Black
+                color = if (message.isFromUser) Color.White else Color.Black
             )
         }
     }

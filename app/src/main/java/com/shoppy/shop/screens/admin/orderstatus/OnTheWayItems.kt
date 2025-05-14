@@ -36,7 +36,10 @@ import com.shoppy.shop.navigation.BottomNavScreens
 import com.shoppy.shop.screens.search.SearchBox
 
 @Composable
-fun OnTheWayItems(navHostController: NavHostController, viewModel: OrderStatusViewModel = hiltViewModel()){
+fun OnTheWayItems(
+    navHostController: NavHostController,
+    viewModel: OrderStatusViewModel = hiltViewModel()
+) {
 
     val onTheWayItemsList = remember { mutableStateOf(emptyList<MOrder>()) }
 
@@ -50,26 +53,52 @@ fun OnTheWayItems(navHostController: NavHostController, viewModel: OrderStatusVi
 
     }!!
 
-    Scaffold(modifier = Modifier.fillMaxSize(), topBar = { BackButton(navController = navHostController, topBarTitle = "On The Way Items", spacing = 35.dp) }, backgroundColor = ShopKartUtils.offWhite) { innerPadding ->
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            BackButton(
+                navController = navHostController,
+                topBarTitle = "On The Way Items",
+                spacing = 35.dp
+            )
+        },
+        backgroundColor = ShopKartUtils.offWhite
+    ) { innerPadding ->
 
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
 
-                SearchBox(value = searchByOrderId.value, onChange = searchByOrderId, leadingIcon = R.drawable.ic_search, placeHolder = "Search by Order Id", customAutoFocus = false)
+                SearchBox(
+                    value = searchByOrderId.value,
+                    onChange = searchByOrderId,
+                    leadingIcon = R.drawable.ic_search,
+                    placeHolder = "Search by Order Id",
+                    customAutoFocus = false
+                )
 
                 //Search Button
-                IconButton(modifier = Modifier
-                    .size(55.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Black),
+                IconButton(
+                    modifier = Modifier
+                        .size(55.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.Black),
                     onClick = {
-                        onTheWayItemsList.value = viewModel.fireStatus.value.data?.toList()?.filter { mOrder ->
-                            mOrder.order_id == searchByOrderId.value
-                        }!!
-                    }){
+                        onTheWayItemsList.value =
+                            viewModel.fireStatus.value.data?.toList()?.filter { mOrder ->
+                                mOrder.order_id == searchByOrderId.value
+                            }!!
+                    }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_search),
                         contentDescription = "Search",
@@ -78,18 +107,32 @@ fun OnTheWayItems(navHostController: NavHostController, viewModel: OrderStatusVi
                 }
             }
 
-            LazyColumn{
-                items(items = onTheWayItemsList.value){ ordered ->
-                    DeliveryStatusCard(ordered = ordered, buttonTitle = "Mark Delivered", navHostController = navHostController){
-                        viewModel.markDelivered(
-                            userId = ordered.user_id!!,
-                            product_title = ordered.product_title!!
-                        ) {
-                            navHostController.popBackStack()
-                            navHostController.navigate(BottomNavScreens.OnTheWayItems.route)
-                            Toast.makeText(context, "Item marked as Delivered", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+            LazyColumn {
+                items(items = onTheWayItemsList.value) { ordered ->
+                    DeliveryStatusCard(
+                        ordered = ordered,
+                        buttonTitle = "Mark Delivered",
+                        navHostController = navHostController,
+                        buttonClick = {
+                            viewModel.markDelivered(
+                                userId = ordered.user_id!!,
+                                product_title = ordered.product_title!!,
+                                success = {
+                                    navHostController.popBackStack()
+                                    navHostController.navigate(BottomNavScreens.OnTheWayItems.route)
+                                    Toast.makeText(
+                                        context,
+                                        "Item marked as Delivered",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                },
+                                error = { errorMsg ->
+                                    Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        },
+                        onCancelClick = {}
+                    )
                 }
             }
 

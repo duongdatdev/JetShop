@@ -1,6 +1,7 @@
 package com.shoppy.shop.di
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.shoppy.shop.ShopKartUtils
@@ -11,6 +12,7 @@ import com.shoppy.shop.repository.FireOrderRepository
 import com.shoppy.shop.repository.FireOrderStatusRepository
 import com.shoppy.shop.repository.FireRepository
 import com.shoppy.shop.repository.FireSearchRepository
+import com.shoppy.shop.repository.NotificationRepository
 import com.shoppy.shop.repository.RatingRepository
 import dagger.Module
 import dagger.Provides
@@ -103,6 +105,12 @@ object AppModule {
         return RatingRepository(FirebaseFirestore.getInstance())
     }
 
+    @Singleton
+    @Provides
+    fun providesNotificationRepository(firestore: FirebaseFirestore, auth: FirebaseAuth): NotificationRepository {
+        return NotificationRepository(firestore, auth)
+    }
+
     //Notification API
     @Singleton
     @Provides
@@ -118,5 +126,11 @@ object AppModule {
     @Provides
     fun provideFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
+    }
+    
+    @Singleton
+    @Provides
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
     }
 }

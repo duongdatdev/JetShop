@@ -199,7 +199,7 @@ fun OrdersCardItem(mOrder: MOrder, navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically) {
 
                     Text(
-                        text = "₹${DecimalFormat("#,##,###").format(((mOrder.product_price!! - 100) / countState.value!!).toString().toDouble())}",
+                        text = "₫${ DecimalFormat("#,###").format(((mOrder.product_price!! - 100) / countState.value!!).toString().toDouble())}",
                         style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = roboto),
                         modifier = Modifier.padding(top = 8.dp)
                     )

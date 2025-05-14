@@ -79,16 +79,31 @@ fun OrderedItemsEmp(navHostController: NavHostController,viewModel: OrderStatusE
 
             LazyColumn{
                 items(items = orderedItemsList.value){ ordered ->
-                    DeliveryStatusCard(ordered = ordered, buttonTitle = "Mark On The Way", navHostController = navHostController){
-                        viewModel.markOnTheWay(
-                            userId = ordered.user_id!!,
-                            product_title = ordered.product_title!!
-                        ) {
-                            navHostController.popBackStack()
-                            navHostController.navigate(BottomNavScreens.OrderedItemsEmp.route)
-                            Toast.makeText(context, "Item marked as On The Way", Toast.LENGTH_SHORT).show()
+                    DeliveryStatusCard(
+                        ordered = ordered, 
+                        buttonTitle = "Mark On The Way", 
+                        navHostController = navHostController,
+                        buttonClick = {
+                            viewModel.markOnTheWay(
+                                userId = ordered.user_id!!,
+                                product_title = ordered.product_title!!
+                            ) {
+                                navHostController.popBackStack()
+                                navHostController.navigate(BottomNavScreens.OrderedItemsEmp.route)
+                                Toast.makeText(context, "Item marked as On The Way", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onCancelClick = {
+                            viewModel.markCancelled(
+                                userId = ordered.user_id!!,
+                                product_title = ordered.product_title!!
+                            ) {
+                                navHostController.popBackStack()
+                                navHostController.navigate(BottomNavScreens.OrderedItemsEmp.route)
+                                Toast.makeText(context, "Order has been cancelled", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
+                    )
                 }
             }
 

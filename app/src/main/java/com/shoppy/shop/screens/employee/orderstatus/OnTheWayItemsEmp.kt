@@ -83,12 +83,16 @@ fun OnTheWayItemsEmp(navHostController: NavHostController, viewModel: OrderStatu
                     DeliveryStatusCard(ordered = ordered, buttonTitle = "Mark Delivered", navHostController = navHostController){
                         viewModel.markDelivered(
                             userId = ordered.user_id!!,
-                            product_title = ordered.product_title!!
-                        ) {
-                            navHostController.popBackStack()
-                            navHostController.navigate(BottomNavScreens.OnTheWayItemsEmp.route)
-                            Toast.makeText(context, "Item marked as Delivered", Toast.LENGTH_SHORT).show()
-                        }
+                            product_title = ordered.product_title!!,
+                            success = {
+                                navHostController.popBackStack()
+                                navHostController.navigate(BottomNavScreens.OnTheWayItemsEmp.route)
+                                Toast.makeText(context, "Item marked as Delivered", Toast.LENGTH_SHORT).show()
+                            },
+                            error = { errorMsg ->
+                                Toast.makeText(context, "Error: $errorMsg", Toast.LENGTH_SHORT).show()
+                            }
+                        )
                     }
                 }
             }

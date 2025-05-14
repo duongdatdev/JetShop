@@ -28,7 +28,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.google.firebase.messaging.FirebaseMessaging
 import com.shoppy.shop.R
 import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.components.BackButton
@@ -55,8 +54,6 @@ fun OrderedItems(navHostController: NavHostController,viewModel: OrderStatusView
         mOrder.delivery_status == "Ordered"
 
     }!!
-
-    FirebaseMessaging.getInstance().subscribeToTopic(ShopKartUtils.TOPIC)
 
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = { BackButton(navController = navHostController, topBarTitle = "Ordered Items", spacing = 50.dp) }, backgroundColor = ShopKartUtils.offWhite) { innerPadding ->
 
@@ -88,16 +85,31 @@ fun OrderedItems(navHostController: NavHostController,viewModel: OrderStatusView
 
             LazyColumn{
                 items(items = orderedItemsList.value){ ordered ->
-                    DeliveryStatusCard(ordered = ordered, buttonTitle = "Mark On The Way", navHostController = navHostController){
-                        viewModel.markOnTheWay(
-                            userId = ordered.user_id!!,
-                            product_title = ordered.product_title!!
-                        ) {
-                            navHostController.popBackStack()
-                            navHostController.navigate(BottomNavScreens.OrderedItems.route)
-                            Toast.makeText(context, "Item marked as On The Way", Toast.LENGTH_SHORT).show()
+                    DeliveryStatusCard(
+                        ordered = ordered, 
+                        buttonTitle = "Mark On The Way", 
+                        navHostController = navHostController,
+                        buttonClick = {
+                            viewModel.markOnTheWay(
+                                userId = ordered.user_id!!,
+                                product_title = ordered.product_title!!
+                            ) {
+                                navHostController.popBackStack()
+                                navHostController.navigate(BottomNavScreens.OrderedItems.route)
+                                Toast.makeText(context, "Item marked as On The Way", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onCancelClick = {
+                            viewModel.markCancelled(
+                                userId = ordered.user_id!!,
+                                product_title = ordered.product_title!!
+                            ) {
+                                navHostController.popBackStack()
+                                navHostController.navigate(BottomNavScreens.OrderedItems.route)
+                                Toast.makeText(context, "Order has been cancelled", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
+                    )
                 }
             }
 

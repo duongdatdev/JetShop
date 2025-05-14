@@ -2,6 +2,7 @@ package com.shoppy.shop.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,15 +12,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Badge
+import androidx.compose.material.BadgedBox
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,13 +45,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.shoppy.shop.R
 import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.navigation.BottomNavScreens
+import com.shoppy.shop.navigation.NavScreens
 import com.shoppy.shop.ui.theme.roboto
+import com.shoppy.shop.viewmodels.NotificationViewModel
 
 @Composable
 fun ShopKartAppBar(userName: String?, profile_url: String?, onClick: () -> Unit = {  }){
@@ -119,7 +131,13 @@ fun ShopKartAppBar(userName: String?, profile_url: String?, onClick: () -> Unit 
 }
 
 @Composable
-fun ShopKartAppBar2(userName: String?, profile_url: String?, navHostController: NavHostController,onClick: () -> Unit = {  }){
+fun ShopKartAppBar2(
+    userName: String?, 
+    profile_url: String?, 
+    navHostController: NavHostController,
+    notificationViewModel: NotificationViewModel = hiltViewModel(),
+    onClick: () -> Unit = {  }
+){
     val constraints = ConstraintSet{
         val shopKartIcon = createRefFor(id = "ShopKartIcon")
         val shopKart = createRefFor(id = "ShopKart")
@@ -127,6 +145,7 @@ fun ShopKartAppBar2(userName: String?, profile_url: String?, navHostController: 
         val name = createRefFor(id = "UserName")
         val profileImage = createRefFor(id = "ProfileImage")
         val searchBar = createRefFor(id = "SearchBar")
+        val notificationIcon = createRefFor(id = "NotificationIcon")
 
         constrain(shopKartIcon){
             top.linkTo(parent.top, margin = 20.dp)
@@ -151,13 +170,20 @@ fun ShopKartAppBar2(userName: String?, profile_url: String?, navHostController: 
         constrain(name){
             top.linkTo(parent.top, margin = 20.dp)
             start.linkTo(shopKart.end)
+            end.linkTo(notificationIcon.start)
+            bottom.linkTo(searchBar.top)
+        }
+        
+        constrain(notificationIcon) {
+            top.linkTo(parent.top, margin = 20.dp)
+            start.linkTo(name.end)
             end.linkTo(profileImage.start)
             bottom.linkTo(searchBar.top)
         }
         
         constrain(profileImage){
             top.linkTo(parent.top, margin = 20.dp)
-            start.linkTo(name.end)
+            start.linkTo(notificationIcon.end)
             end.linkTo(parent.end, margin = 20.dp)
             bottom.linkTo(searchBar.top)
         }
@@ -169,6 +195,9 @@ fun ShopKartAppBar2(userName: String?, profile_url: String?, navHostController: 
             bottom.linkTo(parent.bottom)
         }
     }
+    
+    // Get unread notifications count
+    val unreadNotificationsCount by notificationViewModel.unreadNotificationsCount.collectAsState()
     
     ConstraintLayout(constraintSet = constraints, modifier = Modifier
         .height(170.dp)
@@ -183,6 +212,41 @@ fun ShopKartAppBar2(userName: String?, profile_url: String?, navHostController: 
         }
 
         Text(text = "ShopKart", style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto), modifier = Modifier.layoutId("ShopKart"))
+
+        // Notification icon with badge
+        Box(
+            modifier = Modifier.layoutId("NotificationIcon")
+        ) {
+            IconButton(
+                onClick = { navHostController.navigate(BottomNavScreens.Notifications.route) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications",
+                    tint = ShopKartUtils.darkBlue
+                )
+                
+                // Show badge if there are unread notifications
+                if (unreadNotificationsCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .offset(x = 10.dp, y = (-10).dp)
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(Color.Red)
+                            .align(Alignment.TopEnd),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (unreadNotificationsCount > 9) "9+" else unreadNotificationsCount.toString(),
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
 
         //Right side Composable only shown if username is not empty
         if (userName != ""){

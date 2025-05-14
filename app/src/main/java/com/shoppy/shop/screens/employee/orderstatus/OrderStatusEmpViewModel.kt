@@ -40,9 +40,45 @@ class OrderStatusEmpViewModel @Inject constructor(private val fireOrderStatusRep
         }
     }
 
-    fun markDelivered(userId: String,product_title: String,success:() -> Unit){
+    fun markDelivered(userId: String, product_title: String, success:() -> Unit, error: (String) -> Unit = {}){
         viewModelScope.launch {
-            db.collection("Orders").document(userId + product_title).update("delivery_status","Delivered").addOnSuccessListener {
+            val docRef = db.collection("Orders").document(userId + product_title)
+            
+            // Log the document path for debugging
+            android.util.Log.d("OrderStatusEmp", "Updating document: ${docRef.path} for user $userId and product $product_title")
+            android.util.Log.d("OrderStatusEmp", "Document ID: ${userId + product_title}")
+            
+            // First check if the document exists
+            docRef.get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        android.util.Log.d("OrderStatusEmp", "Document exists, current data: ${document.data}")
+                        
+                        // Now attempt to update
+                        docRef.update("delivery_status", "Delivered")
+                            .addOnSuccessListener {
+                                android.util.Log.d("OrderStatusEmp", "Successfully marked as delivered")
+                                success()
+                            }
+                            .addOnFailureListener { e ->
+                                android.util.Log.e("OrderStatusEmp", "Error marking as delivered: ${e.message}")
+                                error(e.message ?: "Failed to update order status")
+                            }
+                    } else {
+                        android.util.Log.e("OrderStatusEmp", "Document does not exist!")
+                        error("Document not found")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    android.util.Log.e("OrderStatusEmp", "Error checking document: ${e.message}")
+                    error("Failed to check document: ${e.message}")
+                }
+        }
+    }
+
+    fun markCancelled(userId: String, product_title: String, success:() -> Unit){
+        viewModelScope.launch {
+            db.collection("Orders").document(userId + product_title).update("delivery_status","Cancelled").addOnSuccessListener {
                 success()
             }
         }

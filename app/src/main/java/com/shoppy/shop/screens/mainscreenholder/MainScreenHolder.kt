@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import com.shoppy.shop.components.ChatDialog
 import com.shoppy.shop.navigation.BottomNavBar
 import com.shoppy.shop.navigation.BottomNavScreens
 import com.shoppy.shop.navigation.BottomNavigation
+import com.shoppy.shop.navigation.NavScreens
 import com.shoppy.shop.viewmodels.ChatViewModel
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -58,23 +60,26 @@ fun MainScreenHolder(
                 enter = fadeIn(animationSpec = tween(200)),
                 exit = fadeOut(animationSpec = tween(200))
             ) {
-                BottomNavBar(navHostController = navHostController) {
-                    currentScreen.value = it
-                }
+                BottomNavBar(
+                    navHostController = navHostController,
+                    onItemSelected = {
+                        currentScreen.value = it
+                    }
+                )
             }
         },
-        floatingActionButton = {
+//        floatingActionButton = {
 //            FloatingActionButton(
-//                onClick = { showChatDialog = true },
+//                onClick = { navController.navigate(NavScreens.AIMessageScreen.name) },
 //                backgroundColor = MaterialTheme.colors.primary
 //            ) {
 //                Icon(
-//                    imageVector = Icons.Default.Favorite,
-//                    contentDescription = "Chat",
+//                    imageVector = Icons.Default.Send,
+//                    contentDescription = "AI Assistant",
 //                    tint = MaterialTheme.colors.onPrimary
 //                )
 //            }
-        }
+//        }
     ) {
         BottomNavigation(
             navController = navHostController,
@@ -86,14 +91,14 @@ fun MainScreenHolder(
             )
         }
 
-        if (showChatDialog) {
-            ChatDialog(
-                onDismiss = { showChatDialog = false },
-                onSendMessage = { message ->
-                    chatViewModel.sendMessage(message)
-                },
-                messages = messages
-            )
-        }
+//        if (showChatDialog) {
+//            ChatDialog(
+//                onDismiss = { showChatDialog = false },
+//                onSendMessage = { message ->
+//                    chatViewModel.sendMessage(message)
+//                },
+//                messages = messages
+//            )
+//        }
     }
 }

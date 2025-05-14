@@ -472,29 +472,23 @@ private fun processOrder(
     viewModel: OrderSummaryScreenViewModel,
     navController: NavHostController
 ) {
-    if (isBuyNow && buyNowId != null) {
-        // Process Buy Now item
-        viewModel.uploadBuyNowItemToOrders(
-            buyNowId = buyNowId,
-            paymentMethod = paymentMethod,
-            deliveryStatus = deliveryStatus
-        ) {
-            navController.navigate(BottomNavScreens.OrderSuccessScreen.route) {
-                popUpTo(id = navController.graph.findStartDestination().id)
-            }
-        }
+    // Navigate to the order confirmation screen instead of directly processing the order
+    val route = if (isBuyNow && buyNowId != null) {
+        "${BottomNavScreens.OrderConfirmationScreen.route}/${itemsList.first().product_price}/${paymentMethod}?buyNowId=${buyNowId}"
     } else {
-        // Process regular cart items
-        viewModel.uploadToOrdersAndDeleteCart(
-            itemsList = itemsList,
-            paymentMethod = paymentMethod,
-            deliveryStatus = deliveryStatus
-        ) {
-            navController.navigate(BottomNavScreens.OrderSuccessScreen.route) {
-                popUpTo(id = navController.graph.findStartDestination().id)
-            }
-        }
+        "${BottomNavScreens.OrderConfirmationScreen.route}/${totalAmount(itemsList)}/${paymentMethod}"
     }
+    navController.navigate(route)
+}
+
+// Helper function to calculate total amount including delivery fee and GST
+private fun totalAmount(itemsList: List<MCart>): Int {
+    var sum = 0
+    itemsList.forEach { item ->
+        sum += item.product_price!! * item.item_count!!
+    }
+    // Add delivery fee (₹100 per item) and GST (₹180 fixed)
+    return sum + (100 * itemsList.size) + 180
 }
 
 @Preview

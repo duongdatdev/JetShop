@@ -71,6 +71,9 @@ import com.shoppy.shop.viewmodels.RatingViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlin.text.format
 import kotlin.text.toInt
+import com.shoppy.shop.ai.AIViewModel
+import com.shoppy.shop.components.AIAssistantFloatingButton
+import androidx.compose.ui.zIndex
 
 @Composable
 fun DetailsScreen(
@@ -100,6 +103,9 @@ fun DetailsScreen(
     // Add rating viewModel
     val ratingViewModel: RatingViewModel = hiltViewModel()
     val ratingsState = ratingViewModel.ratings.collectAsState()
+    
+    // Add AI ViewModel
+    val aiViewModel: AIViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     
     // Track if the user can rate
     val canUserRate = remember { mutableStateOf(false) }
@@ -149,7 +155,43 @@ fun DetailsScreen(
         modifier = Modifier
             .width(width.dp)
             .height(height.dp),
-        backgroundColor = ShopKartUtils.offWhite
+        backgroundColor = ShopKartUtils.offWhite,
+        floatingActionButton = {
+            // Only show AI button for non-admin, non-staff users on the product details screen
+            if (!isAdmin.value && !isStaff.value) {
+                // Collect product details and reviews for AI assistant
+                val productDetailsState = viewModel.productDetails.collectAsState()
+                val product = productDetailsState.value
+                
+                // Get properly formatted product information with real data
+                val productInfo = buildString {
+                    append("Product: ${titleState.value}\n")
+                    append("Description: ${descriptionState.value}\n")
+                    append("Price: ₫${DecimalFormat("#,###").format(priceState.value.toDouble())}\n")
+                    append("Category: $category\n")
+                    append("Stock Availability: ${if (stock > 0) "In Stock ($stock available)" else "Out of Stock"}\n")
+                    if (product?.average_rating != null && product.rating_count != null) {
+                        append("Rating: ${String.format("%.1f", product.average_rating)} out of 5 (${product.rating_count} reviews)\n")
+                    }
+                }
+                
+                // Create reviews string from actual ratings data
+                val reviews = buildString {
+                    ratingsState.value.data?.forEach { rating ->
+                        append("User rated ${rating.rating_value ?: 0}/5 stars and said: \"${rating.comment ?: "No comment"}\"\n")
+                    }
+                    if (ratingsState.value.data.isNullOrEmpty()) {
+                        append("No reviews yet for this product.")
+                    }
+                }
+                
+                AIAssistantFloatingButton(
+                    viewModel = aiViewModel,
+                    productInfo = productInfo,
+                    reviews = reviews
+                )
+            }
+        }
     ) { innerPadding ->
 
         Column(

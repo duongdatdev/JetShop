@@ -249,7 +249,7 @@ fun MyOrderDetailsScreen(navController: NavController,
                         )
 
                         Text(
-                            text = "₹${DecimalFormat("#,##,###").format(product_price.toDouble())}",
+                            text = "₫${ DecimalFormat("#,###").format(product_price.toDouble())}",
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -429,7 +429,7 @@ fun MyOrderDetailsScreen(navController: NavController,
                         )
 
                         Text(
-                            text = "₹${DecimalFormat("#,##,###").format((product_price - 280).toDouble())}",
+                            text = "₫${ DecimalFormat("#,###").format((product_price - 280).toDouble())}",
                             style = TextStyle(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
@@ -457,7 +457,7 @@ fun MyOrderDetailsScreen(navController: NavController,
                         )
 
                         Text(
-                            text = "₹${DecimalFormat("#,##,###").format(product_price.toDouble())}",
+                            text = "₫${ DecimalFormat("#,###").format(product_price.toDouble())}",
                             style = TextStyle(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
