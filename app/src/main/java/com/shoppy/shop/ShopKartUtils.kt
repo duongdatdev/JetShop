@@ -10,7 +10,7 @@ object ShopKartUtils{
     //Colors
     val offWhite = Color(0xFFF5F5F5)
     val blue = Color(0xFF5588FF)
-    val darkBlue = Color(0xFF1C0927)
+    val darkBlue = Color(0xFF3C3C46)
     const val black = 0xFF23272a
 
     //Add your Google Web Client Id from firebase

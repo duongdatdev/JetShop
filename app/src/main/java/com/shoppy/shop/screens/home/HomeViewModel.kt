@@ -43,6 +43,12 @@ class HomeViewModel @Inject constructor(
     val categories = mutableStateListOf<MCategory>()
     val categoryProducts = mutableStateMapOf<String, List<MProducts>>()
 
+    // Admin metrics
+    val totalOrders = mutableStateOf(0)
+    val totalProducts = mutableStateOf(0)
+    val totalUsers = mutableStateOf(0)
+    val isLoadingMetrics = mutableStateOf(false)
+
     private val _isLoadingCategories = mutableStateOf(false)
     val isLoadingCategories = _isLoadingCategories
 
@@ -59,7 +65,40 @@ class HomeViewModel @Inject constructor(
         getSlidersFromFB()
         getBestSellerFromFB()
         getCategories()
+        // Fetch admin metrics
+        getAdminMetrics()
 //        delete()
+    }
+
+    private fun getAdminMetrics() {
+        viewModelScope.launch {
+            isLoadingMetrics.value = true
+            
+            // Get total orders
+            FirebaseFirestore.getInstance().collection("Orders")
+                .get()
+                .addOnSuccessListener { documents ->
+                    totalOrders.value = documents.size()
+                }
+                
+            // Get total products
+            FirebaseFirestore.getInstance().collection("AllProducts")
+                .get()
+                .addOnSuccessListener { documents ->
+                    totalProducts.value = documents.size()
+                }
+                
+            // Get total users
+            FirebaseFirestore.getInstance().collection("Users")
+                .get()
+                .addOnSuccessListener { documents ->
+                    totalUsers.value = documents.size()
+                    isLoadingMetrics.value = false
+                }
+                .addOnFailureListener {
+                    isLoadingMetrics.value = false
+                }
+        }
     }
 
     fun getUserNameAndImage(profile_image: (String?) -> Unit, user: (String?) -> Unit) {
@@ -164,11 +203,13 @@ class HomeViewModel @Inject constructor(
             _isLoading.value = true
             _isLoadingCategories.value = true
             fireDataSlider.value.loading = true
+            isLoadingMetrics.value = true
 
             fireDataSlider.value = fireRepositorySlider.getSlidersFromFB()
             fireDataBrand.value = fireRepositoryBrand.getBrandsFromFB()
             fireDataBS.value = fireRepository.getBestSellerFromFB()
             getCategories()
+            getAdminMetrics()
 
             _isLoading.value = false
             fireDataSlider.value.loading = false

@@ -82,7 +82,7 @@ fun ShopKartAppBar(userName: String?, profile_url: String?, onClick: () -> Unit 
                 }
                 Spacer(modifier = Modifier.width(15.dp))
 
-                Text(text = "ShopKart", style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto))
+                Text(text = "", style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto))
 
                 Spacer(modifier = Modifier.width(50.dp))
 
@@ -211,7 +211,7 @@ fun ShopKartAppBar2(
             Image(painter = painterResource(id = R.drawable.icon_d), contentDescription = "ShopKart Logo" )
         }
 
-        Text(text = "ShopKart", style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto), modifier = Modifier.layoutId("ShopKart"))
+        Text(text = "", style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto), modifier = Modifier.layoutId("ShopKart"))
 
         // Notification icon with badge
         Box(
@@ -253,12 +253,18 @@ fun ShopKartAppBar2(
 
             val user = userName?.split(" ")
 
-            Text(text = "Hello,\n${user?.get(0)}",
-                textAlign = TextAlign.Center, maxLines = 2,
-                overflow = TextOverflow.Ellipsis, modifier = Modifier
+            Text(
+                text = "Hello,${user?.get(0)}",
+                textAlign = TextAlign.Center,
+                modifier = Modifier
                     .layoutId("UserName")
-                    .width(80.dp)
-                    .padding(end = 5.dp), style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, fontFamily = roboto))
+                    .padding(end = 5.dp), // bỏ width cố định
+                style = TextStyle(
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = roboto
+                )
+            )
 
             Surface(modifier = Modifier
                 .layoutId("ProfileImage")

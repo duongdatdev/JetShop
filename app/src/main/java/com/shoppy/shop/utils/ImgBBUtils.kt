@@ -35,22 +35,22 @@ object ImgBBUtils {
 
     private val imgBBService = retrofit.create(ImgBBService::class.java)
 
-//    suspend fun uploadImage(context: Context, imageUri: Uri): String? {
-//        try {
-//            val file = createTempFileFromUri(context, imageUri)
-//            val imageRequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
-//            val keyRequestBody = IMGBB_API_KEY.toRequestBody("text/plain".toMediaTypeOrNull())
-//
-//            val response = imgBBService.uploadImage(
-//                key = keyRequestBody,
-//                image = MultipartBody.Part.createFormData("image", file.name, imageRequestBody)
-//            )
-//            return response.data?.url
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            return null
-//        }
-//    }
+    suspend fun uploadImage(context: Context, imageUri: Uri): String? {
+        try {
+            val file = createTempFileFromUri(context, imageUri)
+            val imageRequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val keyRequestBody = IMGBB_API_KEY.toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val response = imgBBService.uploadImage(
+                key = keyRequestBody,
+                image = MultipartBody.Part.createFormData("image", file.name, imageRequestBody)
+            )
+            return response.data?.url
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
 
     private fun createTempFileFromUri(context: Context, uri: Uri): File {
         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)

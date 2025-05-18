@@ -45,14 +45,12 @@ import com.shoppy.shop.viewmodels.NotificationViewModel
 @Composable
 fun BottomNavBar(
     navHostController: NavHostController,
-    onItemSelected:(BottomNavScreens) -> Unit,
+    onItemSelected: (BottomNavScreens) -> Unit,
     notificationViewModel: NotificationViewModel = hiltViewModel()
 ) {
-
     val isAdmin = remember { mutableStateOf(false) }
     val isStaff = remember { mutableStateOf(false) }
-    
-    // Get unread notifications count
+
     val unreadNotificationsCount by notificationViewModel.unreadNotificationsCount.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -60,124 +58,103 @@ fun BottomNavBar(
         isStaff.value = UserRoleManager.isStaff()
     }
 
-    //If Admin or Staff Account is logged in change BottomNav Bar padding to 80.dp else 40.dp
     val padding = if (isAdmin.value || isStaff.value) 80.dp else 40.dp
-
     val items = if (isAdmin.value || isStaff.value) BottomNavScreens.ItemsAdmin.list else BottomNavScreens.Items.list
-
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
-
     val currentScreen = navBackStackEntry?.destination
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(115.dp)
-            .padding(start = padding, end = padding, top = 35.dp, bottom = 10.dp),
-        shape = RoundedCornerShape(40.dp),
+            .height(90.dp)
+            .padding(start = padding, end = padding, top = 10.dp, bottom = 10.dp),
+        shape = RoundedCornerShape(30.dp),
         color = ShopKartUtils.darkBlue,
+        elevation = 6.dp
     ) {
-
         Row(
             modifier = Modifier
-                .background(Color.Transparent)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .background(Color.Transparent),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             items.forEach { item ->
-
-                //Checking which screen is selected
                 val isSelected = currentScreen?.hierarchy?.any { it.route == item.route } == true
-                
-                // Show notification badge only on the home tab
                 val showBadge = item.route == BottomNavScreens.Home.route && unreadNotificationsCount > 0
 
-                BottomNavBarItems(
-                    item = item, 
+                BottomNavBarItem(
+                    item = item,
                     isSelected = isSelected,
                     showBadge = showBadge,
                     badgeCount = unreadNotificationsCount
                 ) {
                     onItemSelected(item)
                     navHostController.navigate(item.route) {
-                        popUpTo(navHostController.graph.findStartDestination().id){saveState = true}
-
-                        //Avoid multiple copies of same destination when selecting again
+                        popUpTo(navHostController.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true
-
-                        //Restore state when re selecting a previously selected item
-//                        restoreState = true
                     }
                 }
-
             }
         }
     }
 }
 
 @Composable
-fun BottomNavBarItems(
+fun BottomNavBarItem(
     item: BottomNavScreens,
     isSelected: Boolean,
     showBadge: Boolean = false,
     badgeCount: Int = 0,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit
 ) {
-    val contentColor = if (isSelected) Color.White else Color.Gray
+    val iconColor = if (isSelected) Color.White else Color.Gray
+    val textColor = if (isSelected) Color.White else Color.Transparent
 
     Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClick = onClick)
-                .width(55.dp)
+                .size(48.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp, start = 15.dp, end = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = item.icon!!), 
-                    contentDescription = item.title,
-                    tint = contentColor
-                )
-            }
-            
-            // Notification Badge
+            Icon(
+                painter = painterResource(id = item.icon!!),
+                contentDescription = item.title,
+                tint = iconColor,
+                modifier = Modifier.size(24.dp)
+            )
+
             if (showBadge && badgeCount > 0) {
                 Box(
                     modifier = Modifier
-                        .size(18.dp)
-                        .offset(x = 20.dp, y = (-2).dp)
+                        .size(16.dp)
+                        .offset(x = 10.dp, y = (-8).dp)
                         .clip(CircleShape)
-                        .background(Color.Red)
-                        .align(Alignment.TopEnd),
+                        .background(Color.Red),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = if (badgeCount > 9) "9+" else badgeCount.toString(),
                         color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
         }
 
-//           AnimatedVisibility(visible = isSelected) {
-//
-//                    Text(text = item.title,
-//                        color = contentColor,
-//                    modifier = Modifier.padding(bottom = 10.dp),
-//                    style = TextStyle(fontWeight = FontWeight.Bold)
-//                    )
-//            }
+        Text(
+            text = item.title,
+            color = textColor,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }

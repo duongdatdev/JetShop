@@ -301,7 +301,7 @@ fun LoginScreen2(navController: NavController,viewModel: LoginViewModel =  andro
             }
         }
 
-        Text(text = "New to ShopKart? ",
+        Text(text = "New to Shop? ",
             style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = roboto),
             color = Color.Black.copy(alpha = 0.4f), modifier = Modifier.layoutId("newToShopKart").padding(top = 10.dp, bottom = 10.dp))
         

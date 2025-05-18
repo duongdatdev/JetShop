@@ -1,6 +1,8 @@
 package com.shoppy.shop.screens.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -146,6 +148,11 @@ fun HomeScreen(
                             )
                         }
                         else -> {
+                            // Show admin metrics if user is admin
+                            if (isAdmin.value) {
+                                AdminMetricsSection(viewModel = viewModel)
+                            }
+
                             // Content when data is available
                             ContentSection(
                                 slidersList = slidersList,
@@ -176,6 +183,123 @@ fun HomeScreen(
 }
 
 @Composable
+fun AdminMetricsSection(viewModel: HomeViewModel) {
+    val totalOrders by viewModel.totalOrders
+    val totalProducts by viewModel.totalProducts
+    val totalUsers by viewModel.totalUsers
+    val isLoading by viewModel.isLoadingMetrics
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = 4.dp,
+        backgroundColor = Color.White
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Dashboard Metrics",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = roboto
+                ),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = ShopKartUtils.darkBlue)
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    MetricItem(
+                        icon = R.drawable.ic_orders,
+                        title = "Orders",
+                        value = totalOrders.toString(),
+                        color = Color(0xFF3F51B5)
+                    )
+
+                    MetricItem(
+                        icon = R.drawable.ic_cart,
+                        title = "Products",
+                        value = totalProducts.toString(),
+                        color = Color(0xFF4CAF50)
+                    )
+
+                    MetricItem(
+                        icon = R.drawable.ic_profile,
+                        title = "Users",
+                        value = totalUsers.toString(),
+                        color = Color(0xFFFF9800)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MetricItem(
+    icon: Int,
+    title: String,
+    value: String,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(color.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = title,
+                tint = color,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = value,
+            style = TextStyle(
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = roboto
+            )
+        )
+        
+        Text(
+            text = title,
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = roboto,
+                color = Color.Gray
+            )
+        )
+    }
+}
+
+@Composable
 fun ContentSection(
     slidersList: List<MSliders>,
     brandList: List<MBrand>,
@@ -193,13 +317,13 @@ fun ContentSection(
     BrandsList(brands = brandList)
 
     // Best seller section
-    SectionHeader(title = "Best Sellers")
-    ProductSection(
-        products = bestSellerProducts,
-        navController = navController,
-        onAddToCart = onAddToCart,
-        emptyMessage = "No best sellers available"
-    )
+//    SectionHeader(title = "Best Sellers")
+//    ProductSection(
+//        products = bestSellerProducts,
+//        navController = navController,
+//        onAddToCart = onAddToCart,
+//        emptyMessage = "No best sellers available"
+//    )
 
     // Categories divider
     CategoryDivider(navController = navController)

@@ -1,5 +1,6 @@
 package com.shoppy.shop.screens.register
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import com.shoppy.shop.components.TextBox
 import com.shoppy.shop.screens.login.Quotes
 import com.shoppy.shop.ui.theme.roboto
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun RegisterScreen(navController: NavController,viewModel: RegisterViewModel = androidx.lifecycle.viewmodel.compose.viewModel()){
 
@@ -65,7 +67,7 @@ fun RegisterScreen(navController: NavController,viewModel: RegisterViewModel = a
                 BackButton(navController = navController)
 
 
-                Text(text = "Welcome To ShopKart",
+                Text(text = "Welcome To Shop",
                     style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, fontFamily = roboto),
                     textAlign = TextAlign.Center,
                     modifier = Modifier

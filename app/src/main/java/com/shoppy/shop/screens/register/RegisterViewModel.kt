@@ -42,7 +42,7 @@ class RegisterViewModel:ViewModel() {
             id = userId,
             name = uName,
             email = uEmail,
-            password = uPassword,
+            password = "",
             phone_no = uPhone,
             address = uAddress,
             profile_image = "",

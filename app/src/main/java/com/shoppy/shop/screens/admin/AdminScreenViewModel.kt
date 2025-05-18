@@ -2,6 +2,7 @@ package com.shoppy.shop.screens.admin
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
@@ -65,6 +66,7 @@ class AdminScreenViewModel @Inject constructor(
         taskDone: () -> Unit
     ) {
         viewModelScope.launch {
+            Log.d("TAG", "uploadBrand: $selectedImageUri")
             if (selectedImageUri != null) {
                 val imageUrl = CloudinaryUtils.uploadImage(context, selectedImageUri)
                 if (imageUrl != null) {

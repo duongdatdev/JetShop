@@ -84,11 +84,13 @@ fun PaymentScreen(
     
     // Check if we're in buy now mode
     val isBuyNow = buyNowId != null
+    Log.d("PaymentScreen", "Is Buy Now: $isBuyNow")
 
     val buyNowItemState = viewModel.buyNowItem.value
 
     LaunchedEffect(buyNowId) {
         if (isBuyNow) {
+            Log.d("PaymentScreen", "Fetching Buy Now Item with ID: $buyNowId")
             viewModel.getBuyNowItem(buyNowId)
         }
     }

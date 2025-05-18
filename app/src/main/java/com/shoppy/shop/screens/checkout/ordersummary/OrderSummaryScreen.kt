@@ -186,7 +186,7 @@ fun SummaryBottomBar(totalAmount: Int, navController: NavController, buyNowId: S
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
 
                 Icon(imageVector = Icons.Rounded.Info, contentDescription = "Note")
-                Text(text = "Note: ₹100 fee is applied for all the items in the cart", modifier = Modifier.padding(start = 5.dp) ,style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = roboto), color = Color.Black.copy(alpha = 0.5f))
+                Text(text = "Note: 100đ fee is applied for all the items in the cart", modifier = Modifier.padding(start = 5.dp) ,style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = roboto), color = Color.Black.copy(alpha = 0.5f))
             }
 
             PillButton(title = "Continue", color = ShopKartUtils.black.toInt()){ 
