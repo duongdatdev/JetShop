@@ -1,5 +1,6 @@
 package com.shoppy.shop.ai
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,11 @@ class AIViewModel : ViewModel() {
         
         viewModelScope.launch {
             try {
+                Log.d("AIViewModel", "Fetching AI response for message: $userMessage")
+//                Log.d("AIViewModel", "Product Info: $productInfo")
+//                Log.d("AIViewModel", "Reviews: $reviews")
                 val result = if (productInfo.isNotBlank() && reviews.isNotBlank()) {
+                    Log.d("AIViewModel", "Fetching detailed AI response")
                     repository.getAIResponse(userMessage, productInfo, reviews)
                 } else {
                     repository.getSimpleAIResponse(userMessage)

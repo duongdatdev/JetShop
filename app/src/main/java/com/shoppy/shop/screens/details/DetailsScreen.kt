@@ -2,6 +2,7 @@ package com.shoppy.shop.screens.details
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -51,29 +53,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.shoppy.shop.R
 import com.shoppy.shop.ShopKartUtils
+import com.shoppy.shop.ai.AIViewModel
+import com.shoppy.shop.components.AIAssistantFloatingButton
 import com.shoppy.shop.components.BackButton
 import com.shoppy.shop.components.PillButton
-import com.shoppy.shop.navigation.BottomNavScreens
-import com.shoppy.shop.ui.theme.roboto
-import java.text.DecimalFormat
-import com.shoppy.shop.utils.UserRoleManager
+import com.shoppy.shop.components.PlusMinusButtons
 import com.shoppy.shop.components.RatingStars
 import com.shoppy.shop.components.RatingSubmissionForm
 import com.shoppy.shop.components.RatingsList
 import com.shoppy.shop.components.RatingsSummary
+import com.shoppy.shop.navigation.BottomNavScreens
+import com.shoppy.shop.ui.theme.roboto
+import com.shoppy.shop.utils.UserRoleManager
 import com.shoppy.shop.viewmodels.RatingViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
+import java.text.DecimalFormat
 import kotlin.text.format
 import kotlin.text.toInt
-import com.shoppy.shop.ai.AIViewModel
-import com.shoppy.shop.components.AIAssistantFloatingButton
-import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun DetailsScreen(
@@ -103,6 +106,8 @@ fun DetailsScreen(
     // Add rating viewModel
     val ratingViewModel: RatingViewModel = hiltViewModel()
     val ratingsState = ratingViewModel.ratings.collectAsState()
+
+    Log.d("DetailsScreen", "Ratings: ${ratingsState.value.data}")
     
     // Add AI ViewModel
     val aiViewModel: AIViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
@@ -114,6 +119,8 @@ fun DetailsScreen(
     LaunchedEffect(Unit) {
         isAdmin.value = UserRoleManager.isAdmin()
         isStaff.value = UserRoleManager.isStaff()
+
+//        ratingViewModel.debugGetAllRatings()
 
         viewModel.getShopInfoForProduct(productId) { shop ->
             shopId.value = shop.id ?: ""
@@ -177,10 +184,11 @@ fun DetailsScreen(
                 
                 // Create reviews string from actual ratings data
                 val reviews = buildString {
-                    ratingsState.value.data?.forEach { rating ->
-                        append("User rated ${rating.rating_value ?: 0}/5 stars and said: \"${rating.comment ?: "No comment"}\"\n")
-                    }
-                    if (ratingsState.value.data.isNullOrEmpty()) {
+                    if (!ratingsState.value.data.isNullOrEmpty()) {
+                        ratingsState.value.data?.forEach { rating ->
+                            append("User rated ${rating.rating_value ?: 0}/5 stars and said: \"${rating.comment ?: "No comment"}\"\n")
+                        }
+                    } else {
                         append("No reviews yet for this product.")
                     }
                 }
@@ -386,6 +394,8 @@ fun AddToCart(isAdmin:  MutableState<Boolean>, isStaff:  MutableState<Boolean>,e
 
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    // Add a state for item quantity
+    val quantityState = remember { mutableStateOf(1) }
 
     //Hide Add To Cart Option if Admin or Employee is logged in
     if (isAdmin.value || isStaff.value) {
@@ -413,6 +423,62 @@ fun AddToCart(isAdmin:  MutableState<Boolean>, isStaff:  MutableState<Boolean>,e
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
                 )
+                
+                // Add quantity selector
+                if (stock > 0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Quantity: ",
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = roboto
+                            )
+                        )
+                        
+                        // Only enable minus if quantity > 1
+                        PlusMinusButtons(
+                            icon = R.drawable.remove, 
+                            desc = "Minus", 
+                            enabled = quantityState.value > 1
+                        ) {
+                            quantityState.value = quantityState.value - 1
+                        }
+                        
+                        Text(
+                            text = quantityState.value.toString(),
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = roboto
+                            ),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        
+                        // Only enable plus if quantity < 5 and < stock
+                        PlusMinusButtons(
+                            icon = R.drawable.add, 
+                            desc = "Add", 
+                            enabled = quantityState.value < 5 && quantityState.value < stock
+                        ) {
+                            quantityState.value = quantityState.value + 1
+                            
+                            if (quantityState.value == 5) {
+                                Toast.makeText(context,"Maximum quantity per item reached",Toast.LENGTH_SHORT).show()
+                            }
+                            
+                            if (quantityState.value == stock) {
+                                Toast.makeText(context,"Maximum available stock reached",Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
 
                 // Buttons in a row with equal weight
                 Row(
@@ -436,7 +502,8 @@ fun AddToCart(isAdmin:  MutableState<Boolean>, isStaff:  MutableState<Boolean>,e
                                 price = price,
                                 stock = stock,
                                 category = category,
-                                productId = productId
+                                productId = productId,
+                                itemCount = quantityState.value // Pass the selected quantity
                             )
 
                             val navHostController = navController as? NavHostController
@@ -464,7 +531,8 @@ fun AddToCart(isAdmin:  MutableState<Boolean>, isStaff:  MutableState<Boolean>,e
                             price = price,
                             stock = stock,
                             category = category,
-                            productId = productId
+                            productId = productId,
+                            itemCount = quantityState.value // Pass the selected quantity
                         )
 
                         haptic.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
@@ -482,3 +550,19 @@ fun AddToCart(isAdmin:  MutableState<Boolean>, isStaff:  MutableState<Boolean>,e
 //    val navController = rememberNavController()
 //    DetailsScreen(navController = navController,"","MacBook Pro","abcdefghasdfghjklertnmdfm","2,00,000")
 //}
+
+@Composable
+fun PlusMinusButtons(modifier: Modifier = Modifier, icon: Int, desc: String?, enabled: Boolean, onClick: () -> Unit) {
+    Surface(modifier = Modifier
+        .size(28.dp)
+        .clip(RoundedCornerShape(5.dp))
+    ){
+        IconButton(modifier = modifier
+            .background(Color.White)
+            .padding(1.dp)
+            .clip(RoundedCornerShape(5.dp)),
+            enabled = enabled, onClick = { onClick.invoke() }) {
+                Icon(painter = painterResource(id = icon), contentDescription = desc)
+        }
+    }
+}

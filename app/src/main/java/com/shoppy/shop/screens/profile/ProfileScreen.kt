@@ -182,21 +182,21 @@ fun ProfileScreen(navController: NavController,
                     Divider()
                     
                     // Add test notifications button
-//                    ProfileCards(
-//                        title = "Create Test Notification",
-//                        leadingIcon = R.drawable.ic_info,
-//                        tint = Color(0xFFFFC107),
-//                        space = 115.dp
-//                    ) {
-//                        // Create a test notification
-//                        scope.launch {
-//                            NotificationUtils.createTestNotification(
-//                                "Test Notification",
-//                                "This is a test notification message created from the profile screen."
-//                            )
-//                            Toast.makeText(context, "Test notification created", Toast.LENGTH_SHORT).show()
-//                        }
-//                    }
+                    ProfileCards(
+                        title = "Create Test Notification",
+                        leadingIcon = R.drawable.ic_info,
+                        tint = Color(0xFFFFC107),
+                        space = 115.dp
+                    ) {
+                        // Create a test notification
+                        scope.launch {
+                            NotificationUtils.createTestNotification(
+                                "Test Notification",
+                                "This is a test notification message created from the profile screen."
+                            )
+                            Toast.makeText(context, "Test notification created", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                     
                     Divider()
 

@@ -2,7 +2,6 @@ package com.shoppy.shop.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.azure.ai.inference.models.ChatCompletions
 import com.shoppy.shop.ai.AIClient
 import com.shoppy.shop.ai.ChatModels
 import com.shoppy.shop.models.ChatMessage
@@ -41,18 +40,23 @@ class ChatViewModel @Inject constructor() : ViewModel() {
 
             try {
                 withContext(Dispatchers.IO) {
-
-                    val systemMsg = ChatModels.systemMessage()
-                    val userMsg   = ChatModels.userMessage(userMessage.toString())
-                    val options   = ChatModels.makeOptions(listOf(systemMsg, userMsg))
-
-                    // Gọi API đồng bộ
-                    val response: ChatCompletions = AIClient.chatClient.complete(options)
-
-                    val content = response.choice
-                        .message
-                        .content
-                        .trim()
+                    // Using a more straightforward approach with Gemini
+                    val prompt = """
+                        You are a helpful shopping assistant for ShopKart e-commerce app.
+                        Please provide brief, helpful responses to shopping questions.
+                        
+                        User Query: $message
+                    """.trimIndent()
+                    
+                    val response = AIClient.chatModel.generateContent(prompt)
+                    
+                    // Get the response text safely
+                    val content = try {
+                        response.text ?: "Sorry, I couldn't generate a response."
+                    } catch (e: Exception) {
+                        "Sorry, I couldn't process that request properly."
+                    }
+                    
                     val assistantMessage = ChatMessage(content = content, isFromUser = false)
                     chatHistory.add(assistantMessage)
                     _messages.update { currentMessages ->
@@ -63,7 +67,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 // Handle exception
                 _messages.update { currentMessages ->
                     currentMessages + ChatMessage(
-                        content = "An error occurred. Please try again later.",
+                        content = "An error occurred: ${e.message}",
                         isFromUser = false
                     )
                 }

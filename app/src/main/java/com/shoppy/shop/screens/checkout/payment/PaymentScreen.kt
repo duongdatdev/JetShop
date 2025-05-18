@@ -1,5 +1,6 @@
 package com.shoppy.shop.screens.checkout.payment
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -28,6 +29,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,18 +75,33 @@ fun PaymentScreen(
 ) {
 
     val options = listOf("Cash On Delivery", "Credit/Debit Card")
+    
+    // Create a mutable state for total amount that can be updated
+    val adjustedTotalAmount = remember { mutableStateOf(totalAmount) }
 
     var itemList = emptyList<MCart>()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     
     // Check if we're in buy now mode
     val isBuyNow = buyNowId != null
+
+    val buyNowItemState = viewModel.buyNowItem.value
+
+    LaunchedEffect(buyNowId) {
+        if (isBuyNow) {
+            viewModel.getBuyNowItem(buyNowId)
+        }
+    }
     
-    if (isBuyNow && buyNowId != null) {
+    if (isBuyNow) {
         // If we have a Buy Now item, get it from the viewModel
-        val buyNowItemState = viewModel.buyNowItem.value
+        Log.d("PaymentScreen", "Buy Now Item State: $buyNowItemState")
         if (!buyNowItemState.loading!! && buyNowItemState.data != null) {
             itemList = listOf(buyNowItemState.data!!)
+            // Make sure total amount reflects quantity
+            if (totalAmount <= 0 && buyNowItemState.data!!.product_price != null && buyNowItemState.data!!.item_count != null) {
+                adjustedTotalAmount.value = buyNowItemState.data!!.product_price!! * buyNowItemState.data!!.item_count!! + 280 // Adding delivery + GST
+            }
         } else {
             // If not loaded yet, try to load it
             viewModel.getBuyNowItem(buyNowId)
@@ -164,7 +181,7 @@ fun PaymentScreen(
     Scaffold(topBar = { BackButton(navController = navController, topBarTitle = "Payment") },
         backgroundColor = ShopKartUtils.offWhite, bottomBar = {
             PaymentBottomBar(
-                totalAmount = totalAmount,
+                totalAmount = adjustedTotalAmount.value,
                 creditCard = creditCard.value,
                 expiry = expiry.value,
                 cvv = cvv.value,
@@ -452,7 +469,7 @@ fun PaymentBottomBar(
         }
         
         Text(
-            text = "Secured By ShopKart",
+            text = "Secured By JetShop",
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
@@ -474,7 +491,10 @@ private fun processOrder(
 ) {
     // Navigate to the order confirmation screen instead of directly processing the order
     val route = if (isBuyNow && buyNowId != null) {
-        "${BottomNavScreens.OrderConfirmationScreen.route}/${itemsList.first().product_price}/${paymentMethod}?buyNowId=${buyNowId}"
+        // Use the adjusted total amount that includes quantity, delivery fee and GST
+        val item = itemsList.first()
+        val totalPrice = item.product_price!! * (item.item_count ?: 1) + 280 // 100 delivery + 180 GST
+        "${BottomNavScreens.OrderConfirmationScreen.route}/${totalPrice}/${paymentMethod}?buyNowId=${buyNowId}"
     } else {
         "${BottomNavScreens.OrderConfirmationScreen.route}/${totalAmount(itemsList)}/${paymentMethod}"
     }

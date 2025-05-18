@@ -202,7 +202,7 @@ fun ContentSection(
     )
 
     // Categories divider
-    CategoryDivider()
+    CategoryDivider(navController = navController)
 
     // Categories and their products
     CategoriesSection(
@@ -236,7 +236,11 @@ fun CategoriesSection(
     } else {
         categories.forEach { category ->
             category.category_name?.let { categoryName ->
-                SectionHeader(title = categoryName)
+                CategorySectionHeader(
+                    title = categoryName,
+                    category = category,
+                    navController = navController
+                )
 
                 val products = categoryProducts[categoryName] ?: emptyList()
                 ProductSection(
@@ -260,6 +264,42 @@ fun CategoriesSection(
 }
 
 @Composable
+fun CategorySectionHeader(title: String, category: MCategory, navController: NavHostController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = roboto
+            )
+        )
+        
+        TextButton(
+            onClick = { 
+                // Navigate to category screen with the selected category ID
+                navController.navigate(BottomNavScreens.Categories.route)
+            }
+        ) {
+            Text(
+                text = "See All",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colors.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+}
+
+@Composable
 fun SectionHeader(title: String) {
     Text(
         text = title,
@@ -275,7 +315,7 @@ fun SectionHeader(title: String) {
 }
 
 @Composable
-fun CategoryDivider() {
+fun CategoryDivider(navController: NavHostController) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Divider(
             modifier = Modifier
@@ -298,7 +338,8 @@ fun CategoryDivider() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "Categories",
@@ -308,6 +349,22 @@ fun CategoryDivider() {
                         fontFamily = roboto
                     )
                 )
+                
+                TextButton(
+                    onClick = { 
+                        navController.navigate(BottomNavScreens.Categories.route)
+                    },
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text(
+                        text = "View All",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.primary
+                        )
+                    )
+                }
             }
         }
     }

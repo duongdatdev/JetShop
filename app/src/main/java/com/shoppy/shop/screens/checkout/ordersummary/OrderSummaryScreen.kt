@@ -64,7 +64,7 @@ fun OrderSummaryScreen(navController: NavHostController, viewModel: OrderSummary
         val buyNowItemState = viewModel.buyNowItem.value
         if (!buyNowItemState.loading!! && buyNowItemState.data != null) {
             cartList = listOf(buyNowItemState.data!!)
-            totalAmount.value = buyNowItemState.data!!.product_price ?: 0
+            totalAmount.value = buyNowItemState.data!!.product_price!! * (buyNowItemState.data!!.item_count ?: 1)
         }
     } else {
         // Regular cart flow

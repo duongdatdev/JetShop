@@ -29,12 +29,12 @@ class DetailsScreenViewModel :ViewModel(){
     private val _productDetails = MutableStateFlow<MProducts?>(null)
     val productDetails: StateFlow<MProducts?> = _productDetails.asStateFlow()
 
-    fun uploadCartToFirebase(url: Any?,title: String?,description: String?,price: Int?,stock: Int?,category: String?,productId: String?){
+    fun uploadCartToFirebase(url: Any?,title: String?,description: String?,price: Int?,stock: Int?,category: String?,productId: String?, itemCount: Int = 1){
 
         viewModelScope.launch {
            val cart = MCart(
                 timestamp = timeStamp,
-                item_count = 1,
+                item_count = itemCount,
                 user_id = userId,
                 product_url = url,
                 product_title = title,
@@ -42,7 +42,7 @@ class DetailsScreenViewModel :ViewModel(){
                 product_price = price,
                 stock = stock,
                 category = category,
-               product_id = productId
+                product_id = productId
             ).convertToMap()
 
             db.collection("Cart").document(userId + title).set(cart)
@@ -139,14 +139,14 @@ class DetailsScreenViewModel :ViewModel(){
     }
     
     // Function to directly purchase a product without going through the cart
-    fun buyNowProduct(url: Any?, title: String?, description: String?, price: Int?, stock: Int?, category: String?, productId: String?): String {
+    fun buyNowProduct(url: Any?, title: String?, description: String?, price: Int?, stock: Int?, category: String?, productId: String?, itemCount: Int = 1): String {
         // Create a temporary document ID for this buy now purchase
         val buyNowId = "buynow_${userId}_${System.currentTimeMillis()}"
         
         viewModelScope.launch {
             val cart = MCart(
                 timestamp = timeStamp,
-                item_count = 1,
+                item_count = itemCount,
                 user_id = userId,
                 product_url = url,
                 product_title = title,

@@ -293,15 +293,29 @@ fun RatingsList(
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "No reviews yet",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = roboto,
-                    color = Color.Gray
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "No reviews yet for this product",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = roboto,
+                        color = Color.Gray
+                    )
                 )
-            )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Be the first to share your experience!",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = roboto,
+                        color = Color.Gray.copy(alpha = 0.7f)
+                    )
+                )
+            }
         }
     } else {
         Column(

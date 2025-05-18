@@ -1,30 +1,27 @@
 package com.shoppy.shop.ai
 
-import com.azure.ai.inference.ChatCompletionsClient
-import com.azure.ai.inference.ChatCompletionsClientBuilder
-import com.azure.core.credential.AzureKeyCredential
+import com.google.ai.client.generativeai.GenerativeModel
 import com.shoppy.shop.BuildConfig
 
 object AIClient {
-    private val key = AzureKeyCredential(BuildConfig.API_AI_TOKEN)
-    private const val ENDPOINT = "https://models.github.ai/inference"
-
-    val chatClient: ChatCompletionsClient by lazy {
-        ChatCompletionsClientBuilder()
-            .credential(key)
-            .endpoint(ENDPOINT)
-            .buildClient()
+    private val apiKey = BuildConfig.API_AI_TOKEN
+    
+    val chatModel: GenerativeModel by lazy {
+        GenerativeModel(
+            modelName = "gemini-2.0-flash",
+            apiKey = apiKey
+        )
     }
 }
 
-// A simple mock client to replace the Azure implementation
+// These dummy classes can be removed now that we're using Gemini
+// If there are references to them elsewhere, keep them until those references are updated
 class DummyAIClient {
     fun getChatCompletions(deploymentId: String, options: Any): DummyChatResponse {
         return DummyChatResponse()
     }
 }
 
-// A simple mock response
 class DummyChatResponse {
     fun getChoices(): List<DummyChoice> {
         return listOf(DummyChoice())

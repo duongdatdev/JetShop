@@ -149,15 +149,16 @@ fun OrderConfirmationScreen(
                                 .padding(vertical = 4.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            val itemCount = item.item_count ?: 1
                             Text(
-                                text = "${item.product_title} (x${item.item_count})",
+                                text = "${item.product_title} (x${itemCount})",
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontFamily = roboto
                                 )
                             )
                             Text(
-                                text = "₫${DecimalFormat("#,###").format(item.product_price!! * item.item_count!!)}",
+                                text = "₫${DecimalFormat("#,###").format((item.product_price ?: 0) * itemCount)}",
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontFamily = roboto

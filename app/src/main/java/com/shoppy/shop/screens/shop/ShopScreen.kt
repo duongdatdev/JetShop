@@ -88,7 +88,7 @@ fun ShopScreen(
                             ProductCard(
                                 product = product,
                                 onProductClick = {
-                                    navController.navigate("details/${product.product_id}")
+                                    navController.navigate("details/${product.product_url.toString().encodeForUrl()}/${product.product_title?.encodeForUrl()}/${product.product_description?.encodeForUrl()}/${product.product_price}/${product.stock}/${product.category?.encodeForUrl()}/${product.product_id}")
                                 }
                             )
                         }
@@ -97,6 +97,10 @@ fun ShopScreen(
             }
         }
     }
+}
+
+private fun String.encodeForUrl(): String {
+    return java.net.URLEncoder.encode(this, "UTF-8")
 }
 
 @Composable
@@ -136,7 +140,7 @@ fun ProductCard(product: MProducts, onProductClick: () -> Unit) {
                 )
 
                 Text(
-                    text = "₹${product.product_price}",
+                    text = "đ${product.product_price}",
                     style = MaterialTheme.typography.subtitle2,
                     fontWeight = FontWeight.Bold
                 )

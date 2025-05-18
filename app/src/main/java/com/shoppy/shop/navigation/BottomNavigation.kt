@@ -50,6 +50,7 @@ import com.shoppy.shop.screens.admin.rolemanagement.RoleManagementScreen
 import com.shoppy.shop.screens.employee.AddProductSliderEmpl
 import com.shoppy.shop.screens.employee.ShopSettings
 import com.shoppy.shop.screens.shop.ShopScreen
+import com.shoppy.shop.screens.shop.CategoryScreen
 
 
 //BottomNavScreens.Home.route
@@ -388,6 +389,11 @@ fun BottomNavigation(
             val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
             val shopName = backStackEntry.arguments?.getString("shopName") ?: ""
             ShopScreen(navController = navController, shopId = shopId, shopName = shopName)
+        }
+
+        // Add Categories screen route
+        composable(BottomNavScreens.Categories.route) {
+            CategoryScreen(navController = navController)
         }
 
         // Add notification screen route

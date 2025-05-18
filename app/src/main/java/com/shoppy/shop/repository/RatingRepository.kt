@@ -1,5 +1,6 @@
 package com.shoppy.shop.repository
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shoppy.shop.data.DataOrException
 import com.shoppy.shop.models.MRating
@@ -47,11 +48,45 @@ class RatingRepository @Inject constructor(
             
             dataOrException.data = ratings
             dataOrException.loading = false
+            // Clear the exception if successful
+            dataOrException.e = null
         } catch (e: Exception) {
             dataOrException.e = e
             dataOrException.loading = false
+            // Ensure we have an empty list instead of null
+            dataOrException.data = emptyList()
         }
         
+        return dataOrException
+    }
+
+    suspend fun getAllRatings(): DataOrException<List<MRating>, Boolean, Exception> {
+        val dataOrException = DataOrException<List<MRating>, Boolean, Exception>(
+            listOf(), true, Exception("")
+        )
+
+        try {
+            val result = ratingsCollection
+                .get()
+                .await()
+
+            val ratings = result.documents.mapNotNull { document ->
+                val rating = document.toObject(MRating::class.java)
+                Log.d("RatingRepository", "Rating: ${document.id} -> ${rating?.product_id}, ${rating?.rating_value}, ${rating?.user_id}")
+                rating
+            }
+
+            Log.d("RatingRepository", "Total Ratings Found: ${ratings.size}")
+            dataOrException.data = ratings
+            dataOrException.loading = false
+            dataOrException.e = null
+        } catch (e: Exception) {
+            Log.e("RatingRepository", "Error fetching all ratings", e)
+            dataOrException.e = e
+            dataOrException.loading = false
+            dataOrException.data = emptyList()
+        }
+
         return dataOrException
     }
 

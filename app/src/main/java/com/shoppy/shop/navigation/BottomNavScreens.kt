@@ -42,6 +42,7 @@ sealed class BottomNavScreens(
     object RoleManagement: BottomNavScreens(route = "role_management", title = "Role Management")
     object ShopSettings: BottomNavScreens(route = "shopSettings", title = "Shop Settings")
     object Shop: BottomNavScreens(route = "shop", title = "Shop")
+    object Categories: BottomNavScreens(route = "categories", title = "Categories")
 //    object ForgotPasswordScreen: BottomNavScreens(route = "forgotPasswordScreen", title = "ForgotPasswordScreen")
 
     object Items{

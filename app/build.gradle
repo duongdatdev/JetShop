@@ -139,10 +139,8 @@ dependencies {
     implementation libs.cloudinary.android
     implementation(libs.androidx.work.runtime.ktx)
 
-    // Azure AI SDK dependencies
-    implementation 'com.azure:azure-ai-inference:1.0.0-beta.4'
-    implementation 'com.azure:azure-core:1.45.0'
-    implementation 'com.azure:azure-core-http-netty:1.14.0'
+    // Remove Azure AI SDK dependencies and keep only Gemini
+    implementation 'com.google.ai.client.generativeai:generativeai:0.9.0'
 }
 
 // Function to get local properties

@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.network.NotificationApi
+//import com.shoppy.shop.repository.CouponRepository
 import com.shoppy.shop.repository.FireAttendanceRepository
 import com.shoppy.shop.repository.FireCartRepository
 import com.shoppy.shop.repository.FireOrderRepository
@@ -110,6 +111,12 @@ object AppModule {
     fun providesNotificationRepository(firestore: FirebaseFirestore, auth: FirebaseAuth): NotificationRepository {
         return NotificationRepository(firestore, auth)
     }
+    
+//    @Singleton
+//    @Provides
+//    fun providesCouponRepository(firestore: FirebaseFirestore, auth: FirebaseAuth): CouponRepository {
+//        return CouponRepository(firestore, auth)
+//    }
 
     //Notification API
     @Singleton

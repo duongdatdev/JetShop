@@ -9,14 +9,17 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -50,14 +53,21 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -66,11 +76,20 @@ import com.shoppy.shop.ShopKartUtils
 import com.shoppy.shop.ai.AIViewModel
 import com.shoppy.shop.ai.AiResponseState
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 data class ChatMessage(
     val content: String,
     val isFromUser: Boolean
 )
+
+// Companion object to store position across recompositions and screen rotations
+private object AIButtonPosition {
+    // Default values will be overridden
+    var hasInitialized = false
+    var offsetXRatio = 0.85f // Ratio of screen width
+    var offsetYRatio = 0.85f // Ratio of screen height
+}
 
 @Composable
 fun AIAssistantFloatingButton(
@@ -80,11 +99,58 @@ fun AIAssistantFloatingButton(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     
-    // Only show the button on product details screen
+    // Add offset state for dragging - use rememberSaveable to persist across recompositions
+    var offsetX by rememberSaveable { mutableStateOf(0f) }
+    var offsetY by rememberSaveable { mutableStateOf(0f) }
+    
+    // Get screen dimensions to constrain dragging
+    val configuration = LocalConfiguration.current
+    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp.toPx() }
+    val screenHeight = with(LocalDensity.current) { configuration.screenHeightDp.dp.toPx() }
+    
+    // Button size in pixels
+    val buttonSizePx = with(LocalDensity.current) { 56.dp.toPx() }
+    
+    // Set initial position (only once)
+    LaunchedEffect(configuration) {
+        if (!AIButtonPosition.hasInitialized) {
+            // First time initialization with default position at bottom right
+            AIButtonPosition.offsetXRatio = 0.85f
+            AIButtonPosition.offsetYRatio = 0.85f
+            AIButtonPosition.hasInitialized = true
+        }
+        
+        // Calculate position from ratios (allows proper positioning after rotation)
+        offsetX = screenWidth * AIButtonPosition.offsetXRatio - buttonSizePx / 2
+        offsetY = screenHeight * AIButtonPosition.offsetYRatio - buttonSizePx / 2
+        
+        // Ensure button stays within bounds
+        offsetX = offsetX.coerceIn(0f, screenWidth - buttonSizePx)
+        offsetY = offsetY.coerceIn(0f, screenHeight - buttonSizePx)
+    }
+    
+    // Draggable floating button
     Box(
         modifier = Modifier
-            .padding(16.dp)
-            .size(56.dp)
+            .fillMaxSize()
+            .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+                    
+                    // Calculate new position
+                    val newOffsetX = offsetX + dragAmount.x
+                    val newOffsetY = offsetY + dragAmount.y
+                    
+                    // Constrain the button to stay within screen bounds with padding
+                    offsetX = newOffsetX.coerceIn(0f, screenWidth - buttonSizePx)
+                    offsetY = newOffsetY.coerceIn(0f, screenHeight - buttonSizePx)
+                    
+                    // Save position as ratios for persistence across rotations
+                    AIButtonPosition.offsetXRatio = (offsetX + buttonSizePx / 2) / screenWidth
+                    AIButtonPosition.offsetYRatio = (offsetY + buttonSizePx / 2) / screenHeight
+                }
+            }
     ) {
         FloatingActionButton(
             onClick = { showDialog = true },

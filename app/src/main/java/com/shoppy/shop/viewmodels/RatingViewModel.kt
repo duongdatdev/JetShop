@@ -1,5 +1,6 @@
 package com.shoppy.shop.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -32,9 +33,14 @@ class RatingViewModel @Inject constructor(
     private val db = FirebaseFirestore.getInstance()
     
     fun getRatingsByProductId(productId: String) {
+        Log.d("RatingViewModel", "Fetching ratings for product ID: $productId")
         viewModelScope.launch {
-            _ratings.value = DataOrException(listOf(), true, Exception(""))
-            _ratings.value = ratingRepository.getRatingsByProductId(productId)
+            // Reset to loading state
+            _ratings.value = DataOrException(listOf(), true, null)
+            
+            // Get ratings from repository
+            val result = ratingRepository.getRatingsByProductId(productId)
+            _ratings.value = result
             
             // Check if current user can rate this product
             val userId = auth.currentUser?.uid
@@ -62,6 +68,17 @@ class RatingViewModel @Inject constructor(
                     // User can rate only if they have a delivered order and haven't rated yet
                     canUserRate.value = hasDeliveredOrder && canUserRate.value
                 }
+        }
+    }
+
+    fun debugGetAllRatings() {
+        viewModelScope.launch {
+            val allRatingsResult = ratingRepository.getAllRatings()
+            if (allRatingsResult.e == null) {
+                Log.d("RatingViewModel", "All ratings: ${allRatingsResult.data}")
+            } else {
+                Log.e("RatingViewModel", "Failed to get all ratings", allRatingsResult.e)
+            }
         }
     }
     
